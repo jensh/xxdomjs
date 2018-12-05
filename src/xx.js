@@ -143,7 +143,7 @@ xx = (function () {
 					}
 					case s_keep:
 						// if (xx.debug) console.log('xx-for: keep item', el);
-						xx.renderNode(el);
+						xx.renderTree(el);
 						break;
 					default:
 						console.assert(false);
@@ -168,7 +168,7 @@ xx = (function () {
 		_updateChild(el, data) {
 			const scope = el.xx;
 			scope[this.itemName] = data;
-			xx.renderNode(el);
+			xx.renderTree(el);
 		}
 	};
 
@@ -179,6 +179,7 @@ xx = (function () {
 		}
 
 		render(el, scope) {
+			console.log('XXBind Call render on ', el, scope);
 			const oldText = el.xxOldText; // assume reading el.xxOldText is faster than el.innerText.
 			const newText = String(this.contentGenerator.call(el, scope));
 
@@ -327,6 +328,7 @@ xx = (function () {
 		getXxFromEl(el) {
 			if (!el.xxFoo) {
 				// cloned els loose there xxFoo. Get it again from its xxfoo-id.
+				if (!el.getAttribute) return; // e.g document
 				const id = el.getAttribute('xxfoo-id');
 				el.xxFoo = this.xxInstances.get(id);
 			}
@@ -428,15 +430,21 @@ xx = (function () {
 			}
 		},
 
-		renderNode(rootnode) {
+		renderNode(el) {
+			const xxFoo = this.getXxFromEl(el);
+			if (xxFoo) xxFoo.render(el, el.xx);
+		},
+
+		renderTree(rootnode) {
+			this.renderNode(rootnode);
+
 			for (const el of this.getAllChildNodes(rootnode)) {
-				const xxFoo = this.getXxFromEl(el);
-				const scope = el.xx;
-				xxFoo.render(el, scope);
+				this.renderNode(el);
 			}
 		},
 
 		propagateScope(rootnode, scope) {
+			rootnode.xx = scope;
 			for (const el of this.getAllChildNodes(rootnode)) {
 				if (xx.debug) console.log('Assign scope', el, scope);
 				el.xx = scope;
@@ -460,7 +468,7 @@ xx = (function () {
 		render() {
 			if (xx.debug) console.log('xx.render()');
 			if (!this._initialized) this.init();
-			this.renderNode(document);
+			this.renderTree(document);
 		}
 	};
 
