@@ -12,8 +12,14 @@
 	<h1>List</h1>
 	<ul><li xx-for="i of data">Xx-For <span xx-bind="i"></span></li></ul>
 
+	<h2>Source code</h2>
+	<pre xx-bind="src_code"></pre>
+
+
 	<script>
 xx.debug=true;
+
+var src_code = document.body.innerHTML;
 
 var data = [ 'val1', 'val2', 'val3'];
 	</script>

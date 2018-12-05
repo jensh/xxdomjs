@@ -18,8 +18,13 @@
 	<div xx-class="{ green: cnt % 2, blue: 0 }" class="red blue">Color <span xx-bind="cnt"></span></div>
 	<button onclick="count()">Step</button>
 
+	<h2>Source code</h2>
+	<pre xx-bind="src_code"></pre>
+
+
 	<script>
 xx.debug=true;
+var src_code = document.body.innerHTML;
 var cnt = 1;
 setInterval(count, 4000);
 function count() {
