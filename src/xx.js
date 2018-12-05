@@ -143,6 +143,7 @@ xx = (function () {
 					}
 					case s_keep:
 						// if (xx.debug) console.log('xx-for: keep item', el);
+						xx.renderNode(el);
 						break;
 					default:
 						console.assert(false);
@@ -161,15 +162,13 @@ xx = (function () {
 			// newScope[this.itemName] = data;
 			this._updateChild(newNode, data); // Call update before propagateScope!
 
-			xx.renderNode(newNode);
-
 			return newNode;
 		}
 
 		_updateChild(el, data) {
 			const scope = el.xx;
-
 			scope[this.itemName] = data;
+			xx.renderNode(el);
 		}
 	};
 
