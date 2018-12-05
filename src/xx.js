@@ -75,9 +75,17 @@ xx = (function () {
 	}
 
 
-
 	function createChildScope(scope) {
 		return Object.create(scope);
+	}
+
+
+	// Clone a DOM node including its xx properties
+	function cloneNode(el, newScope) {
+		const elRoot = el.cloneNode(true);
+		elRoot.xx = newScope
+		xx.propagateScope(elRoot, newScope);
+		return elRoot;
 	}
 
 
@@ -144,14 +152,12 @@ xx = (function () {
 		}
 
 		_createChild(data, scope) {
-			const newNode = this.template.cloneNode(true);
 			const newScope = createChildScope(scope);
+			const newNode = cloneNode(this.template, newScope);
 
-			newNode.xx = newScope;
 			// newScope[this.itemName] = data;
 			this._updateChild(newNode, data); // Call update before propagateScope!
 
-			xx.propagateScope(newNode, newScope);
 			xx.execXxFors(newNode);
 
 			return newNode;
