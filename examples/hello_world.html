@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title xx-bind="hello">Title</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+	<style>
+.emoji {
+	font-weight: 400;
+	font-family: apple color emoji,segoe ui emoji,noto color emoji,android emoji,emojisymbols,emojione mozilla,twemoji mozilla,segoe ui symbol;
+}
+	</style>
+</head>
+<body>
+	<h1 xx-bind="hello">No script?</h1>
+	<ul><li xx-for="i in demo" xx-bind="i" class="emoji"></li></ul>
+	<script>
+		hello='Hello World!';
+		demo=['Criss-cross', hello, 'Demo'];
+		cnt = 0;
+		setInterval(() => {
+			demo[0] = ['Criss-cross','criss-Cross'][cnt%2];
+			demo[1] = 'Hello' + ['✋','🖐','🖖','✌'][cnt++%4] + ' World!';
+			xx.render();
+		}, 1000);
+	</script>
+</body>

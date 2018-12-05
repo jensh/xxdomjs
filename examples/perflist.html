@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Hello Template</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+</head>
+<body>
+	<h1>Create item list</h1>
+	<button onclick="measure(create, 1000)">Create 1000 items</button>
+	<button onclick="measure(create, 10000)">Create 10000 items</button>
+	<button onclick="measure(clear_list)">Clear</button>
+	<span xx-bind="time"></span>ms
+	<ul><li xx-for="i of list">Label: <span xx-bind="i.label"></span></li></ul>
+
+	<script>
+
+var list = [];
+var time = '?';
+
+// from http://chrisharrington.github.io/demos/performance/
+function x_buildData(count) {
+	count = count || 1000;
+
+	var adjectives = ["pretty", "large", "big", "small", "tall", "short", "long", "handsome", "plain", "quaint", "clean", "elegant", "easy", "angry", "crazy", "helpful", "mushy", "odd", "unsightly", "adorable", "important", "inexpensive", "cheap", "expensive", "fancy"];
+	var colours = ["red", "yellow", "blue", "green", "pink", "brown", "purple", "brown", "white", "black", "orange"];
+	var nouns = ["table", "chair", "house", "bbq", "desk", "car", "pony", "cookie", "sandwich", "burger", "pizza", "mouse", "keyboard"];
+	var data = [];
+	for (var i = 0; i < count; i++) {
+		data.push({id: i+1, label: adjectives[x_random(adjectives.length)] + " " + colours[x_random(colours.length)] + " " + nouns[x_random(nouns.length)] });
+	}
+	return data;
+}
+
+
+function x_random(max) {
+	return Math.round(Math.random()*1000)%max;
+}
+
+function measure(func, ...args) {
+	let start = new Date();
+	console.log('Call', func, ...args);
+	func(...args);
+	time = (new Date() - start); // Measure func()
+	xx.render(); // render time.
+}
+
+function clear_list() {
+	list = [];
+	xx.render();
+}
+
+function create(count) {
+	console.log('create', count);
+	list = x_buildData(count);
+	xx.render();
+}
+
+	</script>
+</body>

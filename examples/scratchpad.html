@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Hello Template</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+</head>
+<body>
+	<h1>Hi There</h1>
+	<p>
+		A: <span xx-bind="data.a">Empty</span>.<br />
+		B: <span xx-bind="data.b">Empty2</span>.<br />
+		42: <span xx-bind="42">Empty2</span>.<br />
+		this: <span xx-bind="this">Empty2</span>.<br />
+		counter: <span xx-bind="data.counter">Empty2</span>.<br />
+
+		data.list:<span xx-bind="data.list">Empty2</span>.<br />
+
+		<!--
+		error: <span xx-bind="th;is">Empty2</span>.<br />
+		Fetch exception error:<span xx-bind="(()=>{throw 'x';})()">Empty2</span>.<br />
+		  --->
+
+		Arguments:<span xx-bind="[...arguments]">Empty2</span>.<br />
+	</p>
+	<h1>List</h1>
+	<ul><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li></ul>
+
+	<!--
+
+	<h1>List One Item Before</h1>
+	<ul><li>One Item before</li><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li></ul>
+
+	<h1>List One Item After</h1>
+	<ul><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li><li>One Item after</li></ul>
+		  --->
+
+	<h1>Nested list</h1>
+	<ul>
+		<!-- Warning:                     v- New instance of array every render cycle! -->
+		<li pos="outer" xx-for="loopi of data.nest">
+			Loopi:<span xx-bind="loopi">Template loopi</span>
+			<ul>
+				<li pos="inner" xx-for="j of loopi">
+					* loopi:<span xx-bind="loopi">Template loopi</span> j:<span xx-bind="j">Template j</span>
+					<button xx-bind="j" onclick="alert('Click ' + this.xx.j)">b</button>
+				</li>
+			</ul>
+		</li>
+	</ul>
+
+
+	<script>
+var loopi='Global loopi';
+
+// Test global data:
+var data = {
+	a: 'Value A',
+	b: 'Value B',
+	counter: 0,
+	list: [ 'A', 'B', 'C', { x:'x'} ],
+	time: 0,
+	nest: [['1.1','1.2'],['2.1','2.2']],
+}
+
+
+// Do something once in a while:
+setInterval(function() {
+	data.counter++;
+	xx.render();
+}, 10000);
+/*
+*/
+
+
+	</script>
+
+</body>
+</html>
