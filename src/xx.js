@@ -189,29 +189,89 @@ xx = (function () {
 	}
 
 
+	// Return a canonical Object
+	// "className" -> { className: true}
+	// ["cn1","cn2"] -> { cn1: true, cn2: true }
+	// {} -> {}
+	function cssCanonical(css) {
+		if (css instanceof Array) {
+			css = Object.assign(...css.map(x=>cssCanonical(x)));
+		} else if (typeof css == 'string') {
+			return { [css] : true };
+		}
+		if (!(css instanceof Object)) css = cssCanonical('' + css);
+		return css;
+	}
+
+
+	class XxClass {
+		constructor(cssGenerator) {
+			Object.assign(this, {cssGenerator});
+		}
+
+		render(el, scope) {
+			const cssRaw = this.cssGenerator();
+			const css = cssCanonical(cssRaw);
+			const oldCss = el.xxOldCss;// || [...el.classList]
+			const both = Object.assign({}, oldCss, css);
+
+			for (const cn in both) {
+				const n = !!css[cn],
+				      o = (oldCss ? oldCss[cn]: !n); // !oldCss: Force assignment on first step
+				if (o != n) {
+					(n) ? el.classList.add(cn) : el.classList.remove(cn);
+					if (xx.debug) console.log(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw);
+				}
+			}
+			el.xxOldCss = css;
+		}
+	}
+
+
+	class XxFooMulti {
+		constructor() {
+			this.handler = [];
+		}
+		render(el, scope) {
+			for (const h of this.handler) {
+				h.render(el, scope);
+			}
+		}
+	}
+
+
+	function templateExpression(expressionString, el) {
+		if (xx.debug) console.log('templateExpression', el, expressionString);
+		const code = `with ($scope) return (${expressionString})`;
+		try {
+			const expr = Function("$scope", code);
+			return function (scope) {
+				try {
+					return expr.call(this, scope||0);
+				} catch (err) { // Expression errors
+					console.log(`Expression: ${JSON.stringify(expressionString)}`, err, el, scope);
+					return '';
+				}
+			}
+		} catch(err) { // Parsing errors
+			console.log(`xx-bind=${JSON.stringify(expressionString)}`, el);
+			console.log(code, err);
+			return function() { return '';};
+		}
+	}
+
+
+	function funcFromAttr(el, attrName) {
+		return templateExpression(el.getAttribute(attrName), el);
+	}
+
+
 	const xx = {
 		debug: false,
 		recycleDOMnodes: true, // Faster, but DOM nodes change scope on the fly (un-keyed)
 
-		templateExpression(expressionString, el) {
-			if (xx.debug) console.log('templateExpression', el, expressionString);
-			const code = `with ($scope) return (${expressionString})`;
-			try {
-				const expr = Function("$scope", code);
-				return function (scope) {
-					try {
-						return expr.call(this, scope||0);
-					} catch (err) { // Expression errors
-						console.log(`Expression: ${JSON.stringify(expressionString)}`, err, el, scope);
-						return '';
-					}
-				}
-			} catch(err) { // Parsing errors
-				console.log(`xx-bind=${JSON.stringify(expressionString)}`, el);
-				console.log(code, err);
-				return function() { return '';};
-			}
-		},
+		templateExpression,
+		funcFromAttr,
 
 		getAllChildNodes(rootnode = document) {
 			return rootnode.xxChildNodes || (rootnode.xxChildNodes = rootnode.querySelectorAll('[xxfoo-id]'));
@@ -223,6 +283,10 @@ xx = (function () {
 
 		getAllXxBind(rootnode = document) {
 			return rootnode.querySelectorAll('[xx-bind]');
+		},
+
+		getAllXxClass(rootnode = document) {
+			return rootnode.querySelectorAll('[xx-class]');
 		},
 
 		xxInstances: new Map,
@@ -237,15 +301,17 @@ xx = (function () {
 			return el.xxFoo;
 		},
 
-		registerXxFoo(el, xxFoo) {
-			let id = this.xxId++;
+		addXxFoo(el, xxFoo) {
+			let foo = el.xxFoo;
+			if (!foo) {
+				el.xxFoo = foo = new XxFooMulti;
 
-			el.xxFoo = xxFoo;
+				let id = "" + this.xxId++;
+				el.setAttribute('xxfoo-id', id);
 
-			el.setAttribute('xxfoo-id', id);
-			id = el.getAttribute('xxfoo-id');
-
-			this.xxInstances.set(id, xxFoo);
+				this.xxInstances.set(id, foo);
+			}
+			foo.handler.push(xxFoo);
 		},
 
 		_initXxFor(el) {
@@ -253,7 +319,7 @@ xx = (function () {
 			const [, itemName, listFactoryStr] =
 			      forStr.match(/([a-z_]\w*)\s+(?:of|in)\b\s*(.*)/i) || // '${varname} of ${expression}'
 			      [, '$i', forStr ];
-			const listFactory = this.templateExpression(listFactoryStr, el);
+			const listFactory = templateExpression(listFactoryStr, el);
 
 			const marker =  document.createElement('script');
 			marker.type = 'xx-for-marker';
@@ -266,7 +332,7 @@ xx = (function () {
 
 			const xxFor = new XxFor(template, itemName, listFactory);
 
-			this.registerXxFoo(marker, xxFor);
+			this.addXxFoo(marker, xxFor);
 		},
 
 		_initXxFors() {
@@ -277,18 +343,24 @@ xx = (function () {
 		},
 
 		_initXxBind(el) {
-			const contentGenStr = el.getAttribute('xx-bind');
-			const contentGenerator = this.templateExpression(contentGenStr, el);
+			this.addXxFoo(el, new XxBind(funcFromAttr(el, 'xx-bind')));
+		},
 
-			const xxBind = new XxBind(contentGenerator);
-
-			this.registerXxFoo(el, xxBind);
+		_initXxClass(el) {
+			this.addXxFoo(el, new XxClass(funcFromAttr(el, 'xx-class')));
 		},
 
 		_initXxBinds() {
 			for (const el of this.getAllXxBind()) {
 				if (xx.debug) console.log('init xx-bind@', el);
 				this._initXxBind(el);
+			}
+		},
+
+		_initXxClasss() {
+			for (const el of this.getAllXxClass()) {
+				if (xx.debug) console.log('init xx-class@', el);
+				this._initXxClass(el);
 			}
 		},
 
@@ -318,6 +390,7 @@ xx = (function () {
 			this._initialized = true;
 			const rootScope = {};
 			this._initXxBinds();
+			this._initXxClasss();
 			this._initXxFors();
 			this.propagateScope(document, rootScope);
 		},

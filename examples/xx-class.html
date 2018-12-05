@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-class</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+	<style>
+.green {
+	background: green;
+}
+	</style>
+</head>
+<body>
+	<h1>Class</h1>
+	<div xx-class="{ green: cnt % 2, blue: 0 }" class="red blue">Color <span xx-bind="cnt"></span></div>
+	<button onclick="count()">Step</button>
+
+	<script>
+xx.debug=true;
+var cnt = 1;
+setInterval(count, 4000);
+function count() {
+	cnt++;
+	xx.render();
+}
+	</script>
+</body>
+</html>
