@@ -228,6 +228,22 @@ xx = (function () {
 	}
 
 
+	class XxHandlebar {
+		constructor(contentGenerator) {
+			Object.assign(this, {contentGenerator});
+		}
+
+		render(el, scope) {
+			const oldText = el.xxOldText;
+			const newText = String(this.contentGenerator.call(el, scope));
+
+			if (oldText != newText) { // Update DOM only if needed
+				el.nextSibling.textContent = el.xxOldText = newText;
+			}
+		}
+	}
+
+
 	class XxFooMulti {
 		constructor() {
 			this.handler = [];
@@ -293,6 +309,18 @@ xx = (function () {
 			return rootnode.querySelectorAll('[xx-scope]');
 		},
 
+		*getAllXxHandlebarNodes(rootnode = document.body) {
+			const walker = document.createNodeIterator(
+				rootnode, NodeFilter.SHOW_TEXT,
+				el => (/{{.*}}/.test(el.textContent))
+					? NodeFilter.FILTER_ACCEPT
+					: NodeFilter.FILTER_REJECT
+			);
+			for (let el; el = walker.nextNode();) {
+				yield el;
+			}
+		},
+
 		xxInstances: new Map,
 		xxId: 0,
 
@@ -334,9 +362,7 @@ xx = (function () {
 
 			el.parentNode.replaceChild(marker, el); // DOM: replace el/template by marker
 
-			const xxFor = new XxFor(template, itemName, listFactory);
-
-			this.addXxFoo(marker, xxFor);
+			this.addXxFoo(marker, new XxFor(template, itemName, listFactory));
 		},
 
 		_initXxFors() {
@@ -359,6 +385,21 @@ xx = (function () {
 			this.propagateScope(el, scope);
 		},
 
+		_initXxHandlebar(el) {
+			// ToDo: We need some tests here!!!
+			const templateStr = el.textContent
+			      .replace(/{{(.*?)}}/g, (_,exp) => '${'+exp+'}'); // Transform {{expr}} into ${expr}
+
+			const contentGen = templateExpression('`'+templateStr+'`', el);
+
+			const marker =  document.createElement('script');
+			marker.type = 'xx-handlebar-marker';
+
+			el.parentNode.insertBefore(marker, el); // Manipulate textnode after marker
+
+			this.addXxFoo(marker, new XxHandlebar(contentGen));
+		},
+
 		_initXxBinds() {
 			for (const el of this.getAllXxBind()) {
 				if (xx.debug) console.log('init xx-bind@', el);
@@ -377,6 +418,13 @@ xx = (function () {
 			for (const el of this.getAllXxScope()) {
 				if (xx.debug) console.log('init xx-scope@', el);
 				this._initXxScope(el);
+			}
+		},
+
+		_initXxHandlebars() {
+			for (const el of this.getAllXxHandlebarNodes()) {
+				if (xx.debug) console.log('init {{}}@', el);
+				this._initXxHandlebar(el);
 			}
 		},
 
@@ -403,6 +451,7 @@ xx = (function () {
 			const rootScope = {};
 			this._initXxBinds();
 			this._initXxClasss();
+			this._initXxHandlebars();
 			this._initXxFors();
 			this.propagateScope(document, rootScope);
 			this._initXxScopes();
