@@ -17,10 +17,15 @@
 <body>
 	<h1 xx-bind="hello">No script?</h1>
 	<ul><li xx-for="i in demo" xx-bind="i" class="emoji"></li></ul>
+
+	<h2>Source code</h2>
+	<pre xx-bind="src_code"></pre>
+
 	<script>
 		hello='Hello World!';
 		demo=['Criss-cross', hello, 'Demo'];
 		cnt = 0;
+		src_code = document.body.innerHTML;
 		setInterval(() => {
 			demo[0] = ['Criss-cross','criss-Cross'][cnt%2];
 			demo[1] = 'Hello' + ['✋','🖐','🖖','✌'][cnt++%4] + ' World!';
