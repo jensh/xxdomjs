@@ -83,8 +83,11 @@ xx = (function () {
 	// Clone a DOM node including its xx properties
 	function cloneNode(el, newScope) {
 		const elRoot = el.cloneNode(true);
+		const xxChildNodes = [];
+
 		elRoot.xx = newScope
 		xx.propagateScope(elRoot, newScope);
+
 		return elRoot;
 	}
 
@@ -94,7 +97,7 @@ xx = (function () {
 			Object.assign(this, { template, itemName, listFactory});
 		}
 
-		exec(marker, scope) {
+		render(marker, scope) {
 			if (xx.debug) console.log('Exec For', this, marker, scope);
 
 			const list = [...(this.listFactory.call(null, scope) || [])]; // Clone list-> Disallow mutation.-> Keep in sync with DOM
@@ -158,7 +161,7 @@ xx = (function () {
 			// newScope[this.itemName] = data;
 			this._updateChild(newNode, data); // Call update before propagateScope!
 
-			xx.execXxFors(newNode);
+			xx.renderNode(newNode);
 
 			return newNode;
 		}
@@ -176,7 +179,7 @@ xx = (function () {
 			Object.assign(this, {contentGenerator});
 		}
 
-		exec(el, scope) {
+		render(el, scope) {
 			const oldText = el.xxOldText; // assume reading el.xxOldText is faster than el.innerText.
 			const newText = String(this.contentGenerator.call(el, scope));
 
@@ -211,16 +214,12 @@ xx = (function () {
 			}
 		},
 
+		getAllChildNodes(rootnode = document) {
+			return rootnode.xxChildNodes || (rootnode.xxChildNodes = rootnode.querySelectorAll('[xxfoo-id]'));
+		},
+
 		getAllXxFor(rootnode = document) {
 			return rootnode.querySelectorAll('[xx-for]');
-		},
-
-		getAllXxForMarker(rootnode = document) {
-			return rootnode.querySelectorAll('[type=xx-for-marker]');
-		},
-
-		getAllNodesWithScope(rootnode = document) {
-			return rootnode.querySelectorAll('[xx-bind],[type=xx-for-marker]');
 		},
 
 		getAllXxBind(rootnode = document) {
@@ -232,8 +231,8 @@ xx = (function () {
 
 		getXxFromEl(el) {
 			if (!el.xxFoo) {
-				// cloned els loose there xxFoo. Get it again from its xxFoo.id.
-				const id = el.getAttribute('xxFoo.id');
+				// cloned els loose there xxFoo. Get it again from its xxfoo-id.
+				const id = el.getAttribute('xxfoo-id');
 				el.xxFoo = this.xxInstances.get(id);
 			}
 			return el.xxFoo;
@@ -244,8 +243,8 @@ xx = (function () {
 
 			el.xxFoo = xxFoo;
 
-			el.setAttribute('xxFoo.id', id);
-			id = el.getAttribute('xxFoo.id');
+			el.setAttribute('xxfoo-id', id);
+			id = el.getAttribute('xxfoo-id');
 
 			this.xxInstances.set(id, xxFoo);
 		},
@@ -294,34 +293,22 @@ xx = (function () {
 			}
 		},
 
-		execXxFors(rootnode) {
-			for (const el of this.getAllXxForMarker(rootnode)) {
-				const xxFor = this.getXxFromEl(el);
+		renderNode(rootnode) {
+			for (const el of this.getAllChildNodes(rootnode)) {
+				const xxFoo = this.getXxFromEl(el);
 				const scope = el.xx;
 				if (!scope) {
-					console.log('Error: Missing "xx-for" scope!', el);
+					console.log('Error: Missing scope!', el);
 					continue;
 				}
-				xxFor.exec(el, scope);
+				xxFoo.render(el, scope);
 			}
 		},
 
 		propagateScope(rootnode, scope) {
-			for (const el of this.getAllNodesWithScope(rootnode)) {
+			for (const el of this.getAllChildNodes(rootnode)) {
 				if (xx.debug) console.log('Assign scope', el, scope);
 				el.xx = scope;
-			}
-		},
-
-		execXxBinds(rootnode) {
-			for (const el of this.getAllXxBind(rootnode)) {
-				const xxBind = this.getXxFromEl(el);
-				const scope = el.xx;
-				if (!scope) {
-					console.log('Error: Missing "xx-bind" scope!', el);
-					continue;
-				}
-				xxBind.exec(el, scope);
 			}
 		},
 
@@ -339,8 +326,7 @@ xx = (function () {
 		render() {
 			if (xx.debug) console.log('xx.render()');
 			if (!this._initialized) this.init();
-			this.execXxFors(document);
-			this.execXxBinds(document);
+			this.renderNode(document);
 		}
 	};
 
