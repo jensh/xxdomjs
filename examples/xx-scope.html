@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-scope</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+</head>
+<body>
+	<h1>xx-scope Demo</h1>
+
+	<h1>Address</h1>
+	<div xx-scope="new MailAddress('Jens', 'foobar@4k2')">
+		Name: <span xx-bind="name">first</span><br>
+		Address: <span xx-bind="email">first</span><br>
+	</div>
+
+	<h1>ToDo</h1>
+	<div xx-scope="new ToDo('Task1', 'Task2', 'Task3')">
+		<ul>
+			<li xx-for="t of tasks"><span xx-bind="t"></span></li>
+		</ul>
+	</div>
+
+	<h2>Source code</h2>
+	<pre xx-bind="src_code"></pre>
+
+
+	<script>
+var src_code = document.body.innerHTML;
+
+class MailAddress {
+	constructor(name, email) {
+		Object.assign(this, {name, email});
+	}
+}
+
+class ToDo {
+	constructor(...tasks) {
+		this.tasks = tasks;
+	}
+}
+
+	</script>
+</body>
+</html>

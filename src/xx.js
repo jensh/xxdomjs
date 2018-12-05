@@ -289,6 +289,10 @@ xx = (function () {
 			return rootnode.querySelectorAll('[xx-class]');
 		},
 
+		getAllXxScope(rootnode = document) {
+			return rootnode.querySelectorAll('[xx-scope]');
+		},
+
 		xxInstances: new Map,
 		xxId: 0,
 
@@ -350,6 +354,11 @@ xx = (function () {
 			this.addXxFoo(el, new XxClass(funcFromAttr(el, 'xx-class')));
 		},
 
+		_initXxScope(el) {
+			const scope = funcFromAttr(el, 'xx-scope')();
+			this.propagateScope(el, scope);
+		},
+
 		_initXxBinds() {
 			for (const el of this.getAllXxBind()) {
 				if (xx.debug) console.log('init xx-bind@', el);
@@ -364,14 +373,17 @@ xx = (function () {
 			}
 		},
 
+		_initXxScopes() {
+			for (const el of this.getAllXxScope()) {
+				if (xx.debug) console.log('init xx-scope@', el);
+				this._initXxScope(el);
+			}
+		},
+
 		renderNode(rootnode) {
 			for (const el of this.getAllChildNodes(rootnode)) {
 				const xxFoo = this.getXxFromEl(el);
 				const scope = el.xx;
-				if (!scope) {
-					console.log('Error: Missing scope!', el);
-					continue;
-				}
 				xxFoo.render(el, scope);
 			}
 		},
@@ -393,6 +405,7 @@ xx = (function () {
 			this._initXxClasss();
 			this._initXxFors();
 			this.propagateScope(document, rootScope);
+			this._initXxScopes();
 		},
 
 		render() {
