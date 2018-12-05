@@ -179,7 +179,6 @@ xx = (function () {
 		}
 
 		render(el, scope) {
-			console.log('XXBind Call render on ', el, scope);
 			const oldText = el.xxOldText; // assume reading el.xxOldText is faster than el.innerText.
 			const newText = String(this.contentGenerator.call(el, scope));
 
