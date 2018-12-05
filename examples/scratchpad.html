@@ -46,8 +46,9 @@
 			<ul>
 				<li pos="inner" xx-for="j of loopi">
 					* loopi:<span xx-bind="loopi">Template loopi</span> j:<span xx-bind="j">Template j</span>
-					<button xx-bind="j" onclick="alert('Click ' + this.xx.j)">b</button>
+					<button xx-bind="'Delete '+j" onclick="list_del(this, this.xx.j)">b</button>
 				</li>
+				<li><button xx-bind='"Add"' onclick="list_add(this)">xyAdd</button></li>
 			</ul>
 		</li>
 	</ul>
@@ -66,6 +67,17 @@ var data = {
 	nest: [['1.1','1.2'],['2.1','2.2']],
 }
 
+function list_add(el) {
+	console.log('List add', el);
+	el.xx.loopi.push(el.xx.loopi.length);
+	xx.render();
+}
+
+function list_del(el, data) {
+	console.log('List del', el, data);
+	el.xx.loopi.splice(el.xx.loopi.indexOf(data), 1);
+	xx.render();
+}
 
 // Do something once in a while:
 setInterval(function() {
