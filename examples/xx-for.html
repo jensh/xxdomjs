@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-for</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+</head>
+<body>
+	<h1>List</h1>
+	<ul><li xx-for="i of data">Xx-For <span xx-bind="i"></span></li></ul>
+
+	<script>
+xx.debug=true;
+
+var data = [ 'val1', 'val2', 'val3'];
+	</script>
+</body>
+</html>
