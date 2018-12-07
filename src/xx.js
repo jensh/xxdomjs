@@ -254,7 +254,7 @@ xx = (function () {
 		}
 
 		render(el, scope) {
-			const cssRaw = this.cssGenerator();
+			const cssRaw = this.cssGenerator(scope);
 			const css = cssCanonical(cssRaw);
 			const oldCss = el.xxOldCss;// || [...el.classList]
 			const both = Object.assign({}, oldCss, css);
@@ -263,8 +263,12 @@ xx = (function () {
 				const n = !!css[cn],
 				      o = (oldCss ? oldCss[cn]: !n); // !oldCss: Force assignment on first step
 				if (o != n) {
-					(n) ? el.classList.add(cn) : el.classList.remove(cn);
-					if (xx.debug) console.log(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw);
+					try {
+						if (xx.debug) console.log(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw);
+						(n) ? el.classList.add(cn) : el.classList.remove(cn);
+					} catch (err) {
+						console.log(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw, err);
+					}
 				}
 			}
 			el.xxOldCss = css;
