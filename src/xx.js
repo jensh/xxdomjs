@@ -272,6 +272,29 @@ xx = (function () {
 	}
 
 
+	class XxStyle {
+		constructor(styleGenerator) {
+			Object.assign(this, {styleGenerator});
+		}
+
+		render(el, scope) {
+			const style = xx.styleFilter(this.styleGenerator());
+			const oldStyle = el.xxStyle || {};
+
+			for (const sName in style) {
+				const sValue = style[sName];
+				const oldSValue = oldStyle[sName];
+
+				if (sValue != oldSValue) {
+					el.style[sName] = sValue;
+					if (xx.debug) console.log(`Update style ${sName}: ${sValue}`, el);
+				}
+			}
+			el.xxStyle = style;
+		}
+	}
+
+
 	class XxHandlebar {
 		constructor(contentGenerator) {
 			Object.assign(this, {contentGenerator});
@@ -326,7 +349,7 @@ xx = (function () {
 	}
 
 
-	const xx = {
+	let xx = {
 		debug: false,
 		recycleDOMnodes: true, // Faster, but DOM nodes change scope on the fly (un-keyed)
 
@@ -431,6 +454,17 @@ xx = (function () {
 			this.addXxFoo(el, new XxClass(funcFromAttr(el, 'xx-class')));
 		},
 
+
+		styleFilter(style) {
+			// ToDo: Optionally supply vendor prefixes
+			return style instanceof Object ? style : {};
+		},
+
+		_initXxStyle(el) {
+			if (xx.debug) console.log('init xx-style@', el);
+			this.addXxFoo(el, new XxStyle(funcFromAttr(el, 'xx-style')));
+		},
+
 		_initXxScope(el) {
 			if (xx.debug) console.log('init xx-scope@', el);
 			const scope = funcFromAttr(el, 'xx-scope')();
@@ -481,6 +515,9 @@ xx = (function () {
 			for (const el of root.querySelectorAll('[xx-class]')) {
 				this._initXxClass(el);
 			}
+			for (const el of root.querySelectorAll('[xx-style]')) {
+				this._initXxStyle(el);
+			}
 			for (const el of this.getAllXxHandlebarNodes()) {
 				this._initXxHandlebar(el);
 			}
@@ -505,6 +542,8 @@ xx = (function () {
 		init() {
 			if (this._initialized) return;
 			this._initialized = true;
+
+			if (xx.debug) console.log('xxdom Initialize document');
 
 			this._initTree(document, {});
 		},
@@ -539,5 +578,5 @@ xx = (function () {
 		xx.render();
 	}
 
-	return Object.assign(render, xx);
+	return xx = Object.assign(render, xx);
 }());
