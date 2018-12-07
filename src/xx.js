@@ -554,5 +554,10 @@ xx = (function () {
 		console.log(err);
 	}
 
-	return xx;
+	function render() {
+		// Calling xx() is forwarded to xx.render().
+		xx.render();
+	}
+
+	return Object.assign(render, xx);
 }());

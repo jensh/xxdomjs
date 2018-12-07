@@ -69,19 +69,19 @@ var data = {
 function list_add(el) {
 	console.log('List add', el);
 	el.xx.loopi.push(Math.random()*30|0);
-	xx.render();
+	xx();
 }
 
 function list_del(el, data) {
 	console.log('List del', el, data);
 	el.xx.loopi.splice(el.xx.loopi.indexOf(data), 1);
-	xx.render();
+	xx();
 }
 
 // Do something once in a while:
 setInterval(function() {
 	data.counter++;
-	xx.render();
+	xx();
 }, 10000);
 /*
 */

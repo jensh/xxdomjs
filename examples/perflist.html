@@ -45,18 +45,18 @@ function measure(func, ...args) {
 	console.log('Call', func, ...args);
 	func(...args);
 	time = (new Date() - start); // Measure func()
-	xx.render(); // render time.
+	xx(); // render time.
 }
 
 function clear_list() {
 	list = [];
-	xx.render();
+	xx();
 }
 
 function create(count) {
 	console.log('create', count);
 	list = x_buildData(count);
-	xx.render();
+	xx();
 }
 
 	</script>
