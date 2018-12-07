@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-class</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+	<style>
+.box {
+	border: 1px solid blue;
+	text-align: center;
+}
+	</style>
+</head>
+<body>
+	<h1>Style</h1>
+	<div xx-style="{ width: box.width + 'px', height: box.height + 'px'}" class="box">Box {{box.width}} x {{box.height}}</div>
+
+	<h2>Source code</h2>
+	<pre xx-bind="src_code"></pre>
+
+	<script>
+	console.log('xx');
+// xx.debug=true;
+var src_code = document.body.innerHTML;
+const box = {
+	a: 0,
+	width: 200,
+	height: 200
+};
+
+setInterval(step, 50);
+
+function step() {
+	box.a = (box.a + 5) % 360;
+
+	box.width = (300 + Math.sin(box.a * Math.PI/180) * 100|0);
+	box.height = (150 + Math.sin(box.a * Math.PI/180) * 50|0);
+	xx();
+}
+	</script>
+</body>
+</html>
