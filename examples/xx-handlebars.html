@@ -9,22 +9,18 @@
 	<script src="../src/xx.js"></script>
 </head>
 <body>
-	<h1>xx-Handlebar Demo</h1>
-
-	<h2>The name = {{ name }}</h2>
-	<div>
-		Hello {{name}}!
-		Today is {{ new Date }}
-	</div>
+	<h1>Handlebars</h1>
+	<p>
+		Hello {{name}}!<br>
+		Today is {{ (new Date).toDateString() }}
+	</p>
 
 	<h2>Source code</h2>
 	<pre xx-bind="src_code"></pre>
 
 	<script>
 var src_code = document.body.innerHTML;
-let name = 'Friend';
-
-setInterval(xx, 1000); // Render ever 1s to update timer
+let name = 'friend';
 	</script>
 </body>
 </html>

@@ -22,23 +22,21 @@
 	<pre xx-bind="src_code"></pre>
 
 	<script>
-	console.log('xx');
-// xx.debug=true;
 var src_code = document.body.innerHTML;
 const box = {
 	a: 0,
 	width: 200,
-	height: 200
+	height: 50
 };
 
-setInterval(step, 50);
+setTimeout(step, 800);
 
 function step() {
-	box.a = (box.a + 5) % 360;
-
-	box.width = (300 + Math.sin(box.a * Math.PI/180) * 100|0);
-	box.height = (150 + Math.sin(box.a * Math.PI/180) * 50|0);
+	box.a = box.a + 5;
+	box.width = (300 - Math.cos(box.a * Math.PI/180) * 100|0);
+	box.height = (100 - Math.cos(box.a * Math.PI/180) * 50|0);
 	xx();
+	if (box.a < 3*360) setTimeout(step, 50);
 }
 	</script>
 </body>

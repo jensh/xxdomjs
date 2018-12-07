@@ -8,22 +8,34 @@
 
 	<script src="../src/xx.js"></script>
 	<style>
-.green {
+.bg_green {
 	background: green;
+}
+.color_blue {
+	color: blue;
+}
+.abox {
+	border: 2px solid black;
+	padding: 10px;
 }
 	</style>
 </head>
 <body>
-	<h1>Class</h1>
-	<div xx-class="{ green: cnt % 2, blue: 0 }" class="red blue">Color <span xx-bind="cnt"></span></div>
-	<button onclick="count()">Step</button>
+	<h1>Computed classes with xx-class</h1>
+	<div xx-class="{ bg_green: cnt % 2, color_blue: 0 }" class="abox color_blue">
+		Color class="{{this.parentElement.className}}" cnt={{cnt}}
+	</div>
+	<button onclick="count()">Step</button><br>
+
+	Style:
+	<pre xx-bind="src_style"></pre>
 
 	<h2>Source code</h2>
 	<pre xx-bind="src_code"></pre>
 
 
 	<script>
-xx.debug=true;
+var src_style = document.getElementsByTagName('style')[0].innerHTML;
 var src_code = document.body.innerHTML;
 var cnt = 1;
 setInterval(count, 4000);

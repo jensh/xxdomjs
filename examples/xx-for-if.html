@@ -21,18 +21,16 @@
 	<ul class="minh"><li xx-for="i of data" xx-if="i.startsWith('Show:')" >Item {{i}}</li></ul>
 
 	<h1>If</h1>
-	<ul class="minh"><li xx-if="data[1].startsWith('Show:')" >{{data[1]}}</li></ul>
+	<ul class="minh"><li>Showing item 2?<span xx-if="data[1].startsWith('Show:')"> Yes</span></li></ul>
 
 	<h2>Source code</h2>
 	<pre xx-bind="src_code"></pre>
 
 
 	<script>
-xx.debug=true;
-
 var src_code = document.body.innerHTML;
 
-var data = [ 'Show: 1', 'Show: 2', 'Show: 3'];
+var data = [ 'Show: 1', 'No show', 'Show: 3'];
 
 setInterval(function () {
 	// Toggle

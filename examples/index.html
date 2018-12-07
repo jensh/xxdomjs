@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Criss-cross DOM</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+	<style>
+.menu li {
+	display: inline-block;
+	list-style-type: none;
+	padding: 0.2em 1em;
+	margin: 0;
+}
+.active {
+	border-top: 3px solid #ccc;
+	border-bottom: 3px solid #ccc;
+}
+#demo_frame {
+	width: 100%;
+	height: 50em;
+}
+	</style>
+</head>
+<body>
+	<h1>Criss-cross</h1>
+	<ul class="menu">
+		<li xx-for="page of pages" xx-class="{active:(page == active_page)}">
+			<a href="#" onclick="go(this.xx.page)" xx-bind="page.title"></a>
+		</li>
+	</ul>
+
+	<iframe id="demo_frame" src="hello_world.html" frameBorder="0"></iframe>
+
+	<script>
+// xx.debug=true;
+const pages = [
+	{ url: 'hello_world.html', title: 'Hello World'},
+	{ url: 'xx-handlebars.html', title: 'xx-handlebars'},
+	{ url: 'xx-scope.html', title: 'xx-scope'},
+	{ url: 'xx-for.html', title: 'xx-for'},
+	{ url: 'xx-for-if.html', title: 'xx-if'},
+	{ url: 'xx-style.html', title: 'xx-style'},
+	{ url: 'xx-class.html', title: 'xx-class'},
+	{ url: 'perflist.html', title: 'Performance?'},
+];
+let active_page;
+
+go(pages[0]);
+
+function go(page) {
+	active_page = page;
+	// ToDo: implement xx-src="page.url"
+	document.getElementById('demo_frame').src = page.url;
+	xx();
+}
+
+	</script>
+</body>
+</html>

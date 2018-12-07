@@ -15,20 +15,20 @@
 	</style>
 </head>
 <body>
-	<h1 xx-bind="hello">No script?</h1>
-	<ul><li xx-for="i in demo" xx-bind="i" class="emoji"></li></ul>
+	<h1>{{hello}}</h1>
+	<ul><li xx-for="line in demo" class="emoji">{{line}}</li></ul>
 
 	<h2>Source code</h2>
 	<pre xx-bind="src_code"></pre>
 
 	<script>
 		hello='Hello World!';
-		demo=['Criss-cross', hello, 'Demo'];
+		demo=['Criss-cross', 'Demo', hello];
 		cnt = 0;
 		src_code = document.body.innerHTML;
 		setInterval(() => {
-			demo[0] = ['Criss-cross','criss-Cross'][cnt%2];
-			demo[1] = 'Hello' + ['✋','🖐','🖖','✌'][cnt++%4] + ' World!';
+			demo[0] = ['Criss 👈 cross','criss 👉 Cross'][cnt%2];
+			demo[2] = 'Hello' + ['✋','🖐','🖖','✌'][cnt++%4] + 'World!';
 			xx();
 		}, 1000);
 	</script>
