@@ -98,11 +98,11 @@ an update.
 ```
 
 
-Here is a [link to all above examples]<https://4k2.de/xxdomjs/examples/readme.html> in action.
-The other [examples]<https://4k2.de/xxdomjs/examples/> from this repo.
+Here is a [link to all above examples](https://4k2.de/xxdomjs/examples/readme.html) in action.
+The other [examples](https://4k2.de/xxdomjs/examples/) from this repo.
 
 Have fun!
 
 We are interested in your thoughts!
 
-Twitter: [@jens4321]<https://twitter.com/jens4321>
+Twitter: [@jens4321](https://twitter.com/jens4321)
