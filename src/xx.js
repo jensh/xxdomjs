@@ -550,19 +550,24 @@ xx = (function () {
 			if (this._initialized) return;
 			this._initialized = true;
 
-			if (xx.debug) console.log('xxdom Initialize document');
+			if (xx.debug) console.log('xxdom Initialize', root);
 
 			this._initTree(root, {});
 		},
 
 		render() {
-			if (xx.debug) console.log('xx.render()');
 			if (!this._initialized) this.init();
+			if (xx.debug) console.log('xx.render()');
 			this.renderTree(document);
 		}
 	};
 
 
+	try {
+		xx.noinit = document.currentScript.src.indexOf('#noinit') > 0;
+		xx.debug = document.currentScript.src.indexOf('#debug') > 0;
+	} catch (err) {
+	}
 
 	// Render all nodes after DOMContentLoaded
 	try {
@@ -572,7 +577,7 @@ xx = (function () {
 			render();
 		}
 		function render() {
-			if (!xx.no_autostart) {
+			if (!xx.noinit) {
 				xx.render();
 			}
 		}
