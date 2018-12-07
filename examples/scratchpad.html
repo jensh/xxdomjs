@@ -29,18 +29,17 @@
 	<h1>List</h1>
 	<ul><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li></ul>
 
-	<!--
 
 	<h1>List One Item Before</h1>
 	<ul><li>One Item before</li><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li></ul>
 
 	<h1>List One Item After</h1>
 	<ul><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li><li>One Item after</li></ul>
+	<!--
 		  --->
 
 	<h1>Nested list</h1>
 	<ul>
-		<!-- Warning:                     v- New instance of array every render cycle! -->
 		<li pos="outer" xx-for="loopi of data.nest">
 			Loopi:<span xx-bind="loopi">Template loopi</span>
 			<ul>
@@ -69,7 +68,7 @@ var data = {
 
 function list_add(el) {
 	console.log('List add', el);
-	el.xx.loopi.push(el.xx.loopi.length);
+	el.xx.loopi.push(Math.random()*30|0);
 	xx.render();
 }
 
