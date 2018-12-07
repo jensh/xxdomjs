@@ -16,13 +16,19 @@ cd xxdom
 git pull
 
 npm run build
+
+echo 'Continue with "npm publish --dry-run"? Enter "y"'
+read yes
+[ "$yes" = 'y' ] || exit 1
+
 npm publish --dry-run
 
-echo 'Continue? Enter "y"'
+echo 'Continue with "npm publish"? Enter "y"'
 read yes
 [ "$yes" = 'y' ] || exit 1
 
 npm publish
+
 
 # Local Variables:
 #  compile-command: "cd .. && scripts/publish.sh"
