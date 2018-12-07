@@ -525,7 +525,7 @@ xx = (function () {
 			for (const el of root.querySelectorAll('[xx-style]')) {
 				this._initXxStyle(el);
 			}
-			for (const el of this.getAllXxHandlebarNodes()) {
+			for (const el of this.getAllXxHandlebarNodes(root)) {
 				this._initXxHandlebar(el);
 			}
 
@@ -546,13 +546,13 @@ xx = (function () {
 
 		_initialized: false,
 
-		init() {
+		init(root=document) {
 			if (this._initialized) return;
 			this._initialized = true;
 
 			if (xx.debug) console.log('xxdom Initialize document');
 
-			this._initTree(document, {});
+			this._initTree(root, {});
 		},
 
 		render() {
