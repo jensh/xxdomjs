@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-for</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+	<style>
+	.minh {
+		min-height: 4em;
+	}
+	</style>
+</head>
+<body>
+	<h1>List For</h1>
+	<ul class="minh"><li xx-for="i of data">Item {{i}}</li></ul>
+
+	<h1>List For-If</h1>
+	<ul class="minh"><li xx-for="i of data" xx-if="i.startsWith('Show:')" >Item {{i}}</li></ul>
+
+	<h1>If</h1>
+	<ul class="minh"><li xx-if="data[1].startsWith('Show:')" >{{data[1]}}</li></ul>
+
+	<h2>Source code</h2>
+	<pre xx-bind="src_code"></pre>
+
+
+	<script>
+xx.debug=true;
+
+var src_code = document.body.innerHTML;
+
+var data = [ 'Show: 1', 'Show: 2', 'Show: 3'];
+
+setInterval(function () {
+	// Toggle
+	data[1] = data[1].startsWith('Show:') ? 'No show' : 'Show: 2';
+	xx.render();
+}, 3000);
+	</script>
+</body>
+</html>

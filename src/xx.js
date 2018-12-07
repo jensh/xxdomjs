@@ -173,6 +173,50 @@ xx = (function () {
 	};
 
 
+	function listIfFilterFactory(itemName, listFactory, condition) {
+		return (function *(scope) {
+			const ifScope = createChildScope(scope);
+			for (const item of listFactory(scope)) {
+				ifScope[itemName] = item;
+				if (condition(ifScope)) {
+					yield item;
+				}
+			}
+		});
+	}
+
+
+	class XxIf {
+		constructor(template, condition) {
+			Object.assign(this, { template, condition});
+		}
+
+		render(marker, scope) {
+			if (xx.debug) console.log('Exec If', this, marker, scope);
+
+			const cond = !! this.condition();
+			const oldcond = !! marker.xxCond;
+			const child = this.childEl || (this.childEl = this._createChild(scope));
+
+			if (cond != oldcond) {
+				if (cond) {
+					marker.parentNode.insertBefore(child, marker.nextSibling);
+				} else {
+					child.remove();
+				}
+				marker.xxCond = cond;
+			}
+			if (cond) {
+				xx.renderTree(child);
+			}
+		}
+
+		_createChild(scope) {
+			return cloneNode(this.template, createChildScope(scope));
+		}
+	};
+
+
 	class XxBind {
 		constructor(contentGenerator) {
 			Object.assign(this, {contentGenerator});
@@ -293,8 +337,8 @@ xx = (function () {
 			return rootnode.xxChildNodes || (rootnode.xxChildNodes = rootnode.querySelectorAll('[xxfoo-id]'));
 		},
 
-		getAllXxFor(rootnode = document) {
-			return rootnode.querySelectorAll('[xx-for]');
+		getAllXxForOrIf(rootnode = document) {
+			return rootnode.querySelectorAll('[xx-for],[xx-if]');
 		},
 
 		getAllXxBind(rootnode = document) {
@@ -347,30 +391,44 @@ xx = (function () {
 			foo.handler.push(xxFoo);
 		},
 
-		_initXxFor(el) {
+		_initXxForOrIf(el) {
 			const forStr = el.getAttribute('xx-for');
-			const [, itemName, listFactoryStr] =
-			      forStr.match(/([a-z_]\w*)\s+(?:of|in)\b\s*(.*)/i) || // '${varname} of ${expression}'
-			      [, '$i', forStr ];
-			const listFactory = templateExpression(listFactoryStr, el);
-
+			const ifStr = el.getAttribute('xx-if');
+			let ifCondition;
 			const marker =  document.createElement('script');
-			marker.type = 'xx-for-marker';
-			marker.setAttribute('xxCode', `for (${forStr})…`);
-
 			const template = el;
-			template.removeAttribute('xx-for');
+
+			if (ifStr) {
+				template.removeAttribute('xx-if');
+				ifCondition = templateExpression(ifStr, el);
+			}
+			if (forStr) {
+				template.removeAttribute('xx-for');
+				const [, itemName, listFactoryStr] =
+				      forStr.match(/([a-z_]\w*)\s+(?:of|in)\b\s*(.*)/i) || // '${varname} of ${expression}'
+				      [, '$i', forStr ];
+				let listFactory = templateExpression(listFactoryStr, el);
+
+				if (ifCondition) {
+					// xx-for and xx-if combined on one element
+					listFactory = listIfFilterFactory(itemName, listFactory, ifCondition);
+					marker.type = 'xx-for-if-marker';
+					marker.setAttribute('xxCode', `for (${forStr}) if (${ifStr})…`);
+				} else {
+					marker.type = 'xx-for-marker';
+					marker.setAttribute('xxCode', `for (${forStr})…`);
+				}
+
+
+				this.addXxFoo(marker, new XxFor(template, itemName, listFactory));
+			} else {
+				marker.type = 'xx-if-marker';
+				marker.setAttribute('xxCode', `if (${ifStr})…`);
+
+				this.addXxFoo(marker, new XxIf(template, ifCondition));
+			}
 
 			el.parentNode.replaceChild(marker, el); // DOM: replace el/template by marker
-
-			this.addXxFoo(marker, new XxFor(template, itemName, listFactory));
-		},
-
-		_initXxFors() {
-			for (const el of this.getAllXxFor()) {
-				if (xx.debug) console.log('init xx-for@', el);
-				this._initXxFor(el);
-			}
 		},
 
 		_initXxBind(el) {
@@ -399,6 +457,13 @@ xx = (function () {
 			el.parentNode.insertBefore(marker, el); // Manipulate textnode after marker
 
 			this.addXxFoo(marker, new XxHandlebar(contentGen));
+		},
+
+		_initXxForsAndIfs() {
+			for (const el of this.getAllXxForOrIf()) {
+				if (xx.debug) console.log('init xx-for/xx-if@', el);
+				this._initXxForOrIf(el);
+			}
 		},
 
 		_initXxBinds() {
@@ -459,7 +524,7 @@ xx = (function () {
 			this._initXxBinds();
 			this._initXxClasss();
 			this._initXxHandlebars();
-			this._initXxFors();
+			this._initXxForsAndIfs();
 			this.propagateScope(document, rootScope);
 			this._initXxScopes();
 		},
