@@ -14,7 +14,7 @@
 	padding: 0.2em 1em;
 	margin: 0;
 }
-.active {
+.active, .menu li:hover {
 	border-top: 3px solid #ccc;
 	border-bottom: 3px solid #ccc;
 }
@@ -28,7 +28,7 @@
 	<h1>Criss-cross</h1>
 	<ul class="menu">
 		<li xx-for="page of pages" xx-class="{active:(page == active_page)}">
-			<a href="#" onclick="go(this.xx.page)" xx-bind="page.title"></a>
+			<a  onclick="go(this.xx.page)" xx-bind="page.title"></a>
 		</li>
 	</ul>
 
@@ -49,12 +49,14 @@ const pages = [
 ];
 let active_page;
 
-go(pages[0]);
+go(pages.find(p => p.url == window.location.hash.substr(1)) || pages[0]);
 
 function go(page) {
 	active_page = page;
 	// ToDo: implement xx-src="page.url"
 	document.getElementById('demo_frame').src = page.url;
+	window.location.hash = page.url;
+
 	xx();
 }
 
