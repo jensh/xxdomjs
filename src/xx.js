@@ -194,7 +194,7 @@ xx = (function () {
 		render(marker, scope) {
 			if (xx.debug) console.log('Exec If', this, marker, scope);
 
-			const cond = !! this.condition();
+			const cond = !! this.condition(scope);
 			const oldcond = !! marker.xxCond;
 			const child = this.childEl || (this.childEl = this._createChild(scope));
 
@@ -283,7 +283,7 @@ xx = (function () {
 		}
 
 		render(el, scope) {
-			const style = xx.styleFilter(this.styleGenerator());
+			const style = xx.styleFilter(this.styleGenerator(scope));
 			const oldStyle = el.xxStyle || {};
 
 			for (const sName in style) {
