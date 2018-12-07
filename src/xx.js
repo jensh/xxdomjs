@@ -337,20 +337,9 @@ xx = (function () {
 			return rootnode.xxChildNodes || (rootnode.xxChildNodes = rootnode.querySelectorAll('[xxfoo-id]'));
 		},
 
-		getAllXxForOrIf(rootnode = document) {
-			return rootnode.querySelectorAll('[xx-for],[xx-if]');
-		},
-
-		getAllXxBind(rootnode = document) {
-			return rootnode.querySelectorAll('[xx-bind]');
-		},
-
-		getAllXxClass(rootnode = document) {
-			return rootnode.querySelectorAll('[xx-class]');
-		},
 
 		getAllXxScope(rootnode = document) {
-			return rootnode.querySelectorAll('[xx-scope]');
+			return
 		},
 
 		*getAllXxHandlebarNodes(rootnode = document.body) {
@@ -392,6 +381,7 @@ xx = (function () {
 		},
 
 		_initXxForOrIf(el) {
+			if (xx.debug) console.log('init xx-for/xx-if@', el);
 			const forStr = el.getAttribute('xx-for');
 			const ifStr = el.getAttribute('xx-if');
 			let ifCondition;
@@ -432,19 +422,23 @@ xx = (function () {
 		},
 
 		_initXxBind(el) {
+			if (xx.debug) console.log('init xx-bind@', el);
 			this.addXxFoo(el, new XxBind(funcFromAttr(el, 'xx-bind')));
 		},
 
 		_initXxClass(el) {
+			if (xx.debug) console.log('init xx-class@', el);
 			this.addXxFoo(el, new XxClass(funcFromAttr(el, 'xx-class')));
 		},
 
 		_initXxScope(el) {
+			if (xx.debug) console.log('init xx-scope@', el);
 			const scope = funcFromAttr(el, 'xx-scope')();
 			this.propagateScope(el, scope);
 		},
 
 		_initXxHandlebar(el) {
+			if (xx.debug) console.log('init {{}}@', el);
 			// ToDo: We need some tests here!!!
 			const templateStr = el.textContent
 			      .replace(/{{(.*?)}}/g, (_,exp) => '${'+exp+'}'); // Transform {{expr}} into ${expr}
@@ -457,41 +451,6 @@ xx = (function () {
 			el.parentNode.insertBefore(marker, el); // Manipulate textnode after marker
 
 			this.addXxFoo(marker, new XxHandlebar(contentGen));
-		},
-
-		_initXxForsAndIfs() {
-			for (const el of this.getAllXxForOrIf()) {
-				if (xx.debug) console.log('init xx-for/xx-if@', el);
-				this._initXxForOrIf(el);
-			}
-		},
-
-		_initXxBinds() {
-			for (const el of this.getAllXxBind()) {
-				if (xx.debug) console.log('init xx-bind@', el);
-				this._initXxBind(el);
-			}
-		},
-
-		_initXxClasss() {
-			for (const el of this.getAllXxClass()) {
-				if (xx.debug) console.log('init xx-class@', el);
-				this._initXxClass(el);
-			}
-		},
-
-		_initXxScopes() {
-			for (const el of this.getAllXxScope()) {
-				if (xx.debug) console.log('init xx-scope@', el);
-				this._initXxScope(el);
-			}
-		},
-
-		_initXxHandlebars() {
-			for (const el of this.getAllXxHandlebarNodes()) {
-				if (xx.debug) console.log('init {{}}@', el);
-				this._initXxHandlebar(el);
-			}
 		},
 
 		renderNode(el) {
@@ -515,18 +474,39 @@ xx = (function () {
 			}
 		},
 
+		_initTree(root = document, rootScope = {}) {
+			for (const el of root.querySelectorAll('[xx-bind]')) {
+				this._initXxBind(el);
+			}
+			for (const el of root.querySelectorAll('[xx-class]')) {
+				this._initXxClass(el);
+			}
+			for (const el of this.getAllXxHandlebarNodes()) {
+				this._initXxHandlebar(el);
+			}
+
+			// ^templates must be initialized before initializing for/if control structures!
+
+			for (const el of root.querySelectorAll('[xx-for],[xx-if]')) {
+				this._initXxForOrIf(el);
+			}
+
+			// Initialize the scopes last
+
+			this.propagateScope(root, rootScope);
+
+			for (const el of root.querySelectorAll('[xx-scope]')) {
+				this._initXxScope(el);
+			}
+		},
+
 		_initialized: false,
 
 		init() {
 			if (this._initialized) return;
 			this._initialized = true;
-			const rootScope = {};
-			this._initXxBinds();
-			this._initXxClasss();
-			this._initXxHandlebars();
-			this._initXxForsAndIfs();
-			this.propagateScope(document, rootScope);
-			this._initXxScopes();
+
+			this._initTree(document, {});
 		},
 
 		render() {
