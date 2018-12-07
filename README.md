@@ -112,6 +112,8 @@ npm install xxdom
 
 ## Online examples
 
+You can play with the code online [on jsfiddle.net](https://jsfiddle.net/jensh/8k93yzat/13/).
+
 Here is a [link to all above examples](https://4k2.de/xxdomjs/examples/readme.html) in action.
 The other [examples](https://4k2.de/xxdomjs/examples/) from this repo.
 
