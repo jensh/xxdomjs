@@ -98,6 +98,20 @@ an update.
 ```
 
 
+## Installation
+
+Use git:
+```sh
+git clone https://github.com/jensh/xxdomjs.git xxdom
+```
+
+Or npm:
+```sh
+npm install xxdom
+```
+
+## Online examples
+
 Here is a [link to all above examples](https://4k2.de/xxdomjs/examples/readme.html) in action.
 The other [examples](https://4k2.de/xxdomjs/examples/) from this repo.
 
