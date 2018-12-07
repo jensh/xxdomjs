@@ -262,6 +262,7 @@ xx = (function () {
 			for (const cn in both) {
 				const n = !!css[cn],
 				      o = (oldCss ? oldCss[cn]: !n); // !oldCss: Force assignment on first step
+				if (!cn) continue;
 				if (o != n) {
 					try {
 						if (xx.debug) console.log(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw);
@@ -329,6 +330,7 @@ xx = (function () {
 
 	function templateExpression(expressionString, el) {
 		if (xx.debug) console.log('templateExpression', el, expressionString);
+		if (!expressionString) return emptyFunc;
 		const code = `with ($scope) return (${expressionString})`;
 		try {
 			const expr = Function("$scope", code);
@@ -343,8 +345,9 @@ xx = (function () {
 		} catch(err) { // Parsing errors
 			console.log(`xx-bind=${JSON.stringify(expressionString)}`, el);
 			console.log(code, err);
-			return function() { return '';};
+			return emptyFunc;
 		}
+		function emptyFunc() { return '';};
 	}
 
 
