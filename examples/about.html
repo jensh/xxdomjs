@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Criss-cross</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+	<base target="_parent">
+</head>
+<body>
+	<span xx-bind="crisscross()">Criss-cross</span>, the incremental DOM renderer.<br>
+
+	Open source, hosted on <a href="https://github.com/jensh/xxdomjs">github</a>.<br>
+
+	Available via <a href="https://www.npmjs.com/package/xxdom">npm</a>.<br>
+	<pre>
+		npm install xxdom
+	</pre>
+	<script>
+		let cnt=0;
+		let crisscross = ()=>['Criss 👈 cross','criss 👉 Cross'][cnt++%2];
+		setInterval(xx, 1000);
+	</script>
+</body>
+</html>
