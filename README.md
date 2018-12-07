@@ -5,7 +5,7 @@ Criss-cross incremental DOM renderer
 # Jump start
 
 Load `xx.min.js` and you are ready for rendering dynamic content with well known `{{expression}}` syntax.
-The expression inbetween `{{}}` is a pure javascript expression.
+The expression in-between `{{}}` is pure JavaScript.
 
 ```html
 <script src="https://4k2.de/xxdomjs/dist/xx.min.js"></script>
@@ -18,7 +18,7 @@ Today is: {{ (new Date).toDateString() }}.
 </script>
 ```
 
-You can "xx-scope" an html element. Additionaly to the global Javascript scope, every expression
+You can "xx-scope" an HTML element. Additionally to the global JavaScript scope, every expression
 placed in one of the children have also access to this xx-scope. This works very much like
 local variables in js functions.
 
@@ -86,7 +86,7 @@ the keys as the "classname" and its value is an boolean expression for using or 
 ## Re-render
 
 The HTML document will be rendered with Criss-Cross after the "DOMContentLoaded" event.
-If the date/your model changes, you can re-render the DOM by calling `xx.render()` or
+If the data/your model changes, you can re-render the DOM by calling `xx.render()` or
 short just `xx()`. Only changed values will trigger a change on the HTML element. On
 `xx-for` loops, the item identity operator ('===') is used to detect additions, deletions,
 replacements and kept items. If only the item content changes, its HTML element only gets
