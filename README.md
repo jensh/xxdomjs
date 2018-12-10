@@ -29,7 +29,7 @@ local variables in js functions.
 </div>
 ```
 
-## xx-span
+## xx-bind
 
 You can `xx-bind` the result of an expression to the elements `el.innerText`.
 
