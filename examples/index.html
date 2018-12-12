@@ -28,7 +28,7 @@
 	<h1>Criss-cross</h1>
 	<ul class="menu">
 		<li xx-for="page of pages" xx-class="{active:(page == active_page)}">
-			<a  onclick="go(this.xx.page)" xx-bind="page.title"></a>
+			<a  onclick="go(this.xx.page)" xx-text="page.title"></a>
 		</li>
 	</ul>
 

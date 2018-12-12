@@ -217,7 +217,7 @@ xx = (function () {
 	};
 
 
-	class XxBind {
+	class XxText {
 		constructor(contentGenerator) {
 			Object.assign(this, {contentGenerator});
 		}
@@ -343,7 +343,7 @@ xx = (function () {
 				}
 			}
 		} catch(err) { // Parsing errors
-			console.log(`xx-bind=${JSON.stringify(expressionString)}`, el);
+			console.log(`Expression: ${JSON.stringify(expressionString)}`, el);
 			console.log(code, err);
 			return emptyFunc;
 		}
@@ -451,9 +451,9 @@ xx = (function () {
 			el.parentNode.replaceChild(marker, el); // DOM: replace el/template by marker
 		},
 
-		_initXxBind(el) {
-			if (xx.debug) console.log('init xx-bind@', el);
-			this.addXxFoo(el, new XxBind(funcFromAttr(el, 'xx-bind')));
+		_initXxText(el) {
+			if (xx.debug) console.log('init xx-text@', el);
+			this.addXxFoo(el, new XxText(funcFromAttr(el, 'xx-text')));
 		},
 
 		_initXxClass(el) {
@@ -516,8 +516,8 @@ xx = (function () {
 		},
 
 		_initTree(root = document, rootScope = {}) {
-			for (const el of root.querySelectorAll('[xx-bind]')) {
-				this._initXxBind(el);
+			for (const el of root.querySelectorAll('[xx-text]')) {
+				this._initXxText(el);
 			}
 			for (const el of root.querySelectorAll('[xx-class]')) {
 				this._initXxClass(el);

@@ -29,12 +29,12 @@ local variables in js functions.
 </div>
 ```
 
-## xx-bind
+## xx-text
 
-You can `xx-bind` the result of an expression to the elements `el.innerText`.
+You can `xx-text` the result of an expression to the elements `el.innerText`.
 
 ```html
-Hello <span xx-bind="world"></span><span xx-bind="'!'"></span>
+Hello <span xx-text="world"></span><span xx-text="'!'"></span>
 ```
 
 
@@ -46,7 +46,7 @@ Loop over an iterable collection of something and access the items in there on "
 <ul>
 	<li xx-for="item of things.reverse()">
 		The {{item.name}} is
-		<span xx-style="{color: (item.color)}" xx-bind="item.color"></span>.
+		<span xx-style="{color: (item.color)}" xx-text="item.color"></span>.
 	</li>
 </ul>
 <script>

@@ -13,19 +13,19 @@
 
 	<h1>Address</h1>
 	<div xx-scope="new MailAddress('Jens', 'foobar@4k2')">
-		Name: <span xx-bind="name">first</span><br>
-		Address: <span xx-bind="email">first</span><br>
+		Name: <span xx-text="name">first</span><br>
+		Address: <span xx-text="email">first</span><br>
 	</div>
 
 	<h1>ToDo</h1>
 	<div xx-scope="new ToDo('Task1', 'Task2', 'Task3')">
 		<ul>
-			<li xx-for="t of tasks"><span xx-bind="t"></span></li>
+			<li xx-for="t of tasks"><span xx-text="t"></span></li>
 		</ul>
 	</div>
 
 	<h2>Source code</h2>
-	<pre xx-bind="src_code"></pre>
+	<pre xx-text="src_code"></pre>
 
 
 	<script>

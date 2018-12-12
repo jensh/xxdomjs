@@ -11,43 +11,43 @@
 <body>
 	<h1>Hi There</h1>
 	<p>
-		A: <span xx-bind="data.a">Empty</span>.<br />
-		B: <span xx-bind="data.b">Empty2</span>.<br />
-		42: <span xx-bind="42">Empty2</span>.<br />
-		this: <span xx-bind="this">Empty2</span>.<br />
-		counter: <span xx-bind="data.counter">Empty2</span>.<br />
+		A: <span xx-text="data.a">Empty</span>.<br />
+		B: <span xx-text="data.b">Empty2</span>.<br />
+		42: <span xx-text="42">Empty2</span>.<br />
+		this: <span xx-text="this">Empty2</span>.<br />
+		counter: <span xx-text="data.counter">Empty2</span>.<br />
 
-		data.list:<span xx-bind="data.list">Empty2</span>.<br />
+		data.list:<span xx-text="data.list">Empty2</span>.<br />
 
 		<!--
-		error: <span xx-bind="th;is">Empty2</span>.<br />
-		Fetch exception error:<span xx-bind="(()=>{throw 'x';})()">Empty2</span>.<br />
+		error: <span xx-text="th;is">Empty2</span>.<br />
+		Fetch exception error:<span xx-text="(()=>{throw 'x';})()">Empty2</span>.<br />
 		  --->
 
-		Arguments:<span xx-bind="[...arguments]">Empty2</span>.<br />
+		Arguments:<span xx-text="[...arguments]">Empty2</span>.<br />
 	</p>
 	<h1>List</h1>
-	<ul><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li></ul>
+	<ul><li xx-for="i of data.list">Xx-For <span xx-text="i"></span></li></ul>
 
 
 	<h1>List One Item Before</h1>
-	<ul><li>One Item before</li><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li></ul>
+	<ul><li>One Item before</li><li xx-for="i of data.list">Xx-For <span xx-text="i"></span></li></ul>
 
 	<h1>List One Item After</h1>
-	<ul><li xx-for="i of data.list">Xx-For <span xx-bind="i"></span></li><li>One Item after</li></ul>
+	<ul><li xx-for="i of data.list">Xx-For <span xx-text="i"></span></li><li>One Item after</li></ul>
 	<!--
 		  --->
 
 	<h1>Nested list</h1>
 	<ul>
 		<li pos="outer" xx-for="loopi of data.nest">
-			Loopi:<span xx-bind="loopi">Template loopi</span>
+			Loopi:<span xx-text="loopi">Template loopi</span>
 			<ul>
 				<li pos="inner" xx-for="j of loopi">
-					* loopi:<span xx-bind="loopi">Template loopi</span> j:<span xx-bind="j">Template j</span>
-					<button xx-bind="'Delete '+j" onclick="list_del(this, this.xx.j)">b</button>
+					* loopi:<span xx-text="loopi">Template loopi</span> j:<span xx-text="j">Template j</span>
+					<button xx-text="'Delete '+j" onclick="list_del(this, this.xx.j)">b</button>
 				</li>
-				<li><button xx-bind='"Add"' onclick="list_add(this)">xyAdd</button></li>
+				<li><button xx-text='"Add"' onclick="list_add(this)">xyAdd</button></li>
 			</ul>
 		</li>
 	</ul>

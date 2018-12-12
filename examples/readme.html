@@ -30,13 +30,13 @@ Today is: {{ (new Date).toDateString() }}.
 	Access global var world = {{world}}
 </div>
 
-Hello <span xx-bind="world"></span><span xx-bind="'!'"></span>
+Hello <span xx-text="world"></span><span xx-text="'!'"></span>
 
 
 <ul>
 	<li xx-for="item of things.slice(0).reverse()">
 		The {{item.name}} is
-		<span xx-style="{color: (item.color)}" xx-bind="item.color"></span>.
+		<span xx-style="{color: (item.color)}" xx-text="item.color"></span>.
 	</li>
 </ul>
 <script>

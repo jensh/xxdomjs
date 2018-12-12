@@ -17,7 +17,7 @@
 	// Alternative implementations
 
 
-	// Manual walk seams to be slower than elRoot.querySelectorAll('[xx-bind],[type=xx-for-marker]');
+	// Manual walk seams to be slower than elRoot.querySelectorAll('[xx-text],[type=xx-for-marker]');
 	// ~10ms per 1000 items
 	// Clone a DOM node including its xx properties
 	function cloneNode(el, newScope) {

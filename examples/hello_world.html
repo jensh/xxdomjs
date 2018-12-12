@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<title xx-bind="hello">Title</title>
+	<title xx-text="hello">Title</title>
 	<meta name="author" content="Jens Hauke"/>
 
 	<script src="../src/xx.js"></script>
@@ -19,7 +19,7 @@
 	<ul><li xx-for="line in demo" class="emoji">{{line}}</li></ul>
 
 	<h2>Source code</h2>
-	<pre xx-bind="src_code"></pre>
+	<pre xx-text="src_code"></pre>
 
 	<script>
 		hello='Hello World!';
