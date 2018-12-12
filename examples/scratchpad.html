@@ -45,7 +45,7 @@
 			<ul>
 				<li pos="inner" xx-for="j of loopi">
 					* loopi:<span xx-text="loopi">Template loopi</span> j:<span xx-text="j">Template j</span>
-					<button xx-text="'Delete '+j" onclick="list_del(this, this.xx.j)">b</button>
+					<button xx-text="'Delete '+j" onclick="list_del(this, this.$scope.j)">b</button>
 				</li>
 				<li><button xx-text='"Add"' onclick="list_add(this)">xyAdd</button></li>
 			</ul>
@@ -68,13 +68,13 @@ var data = {
 
 function list_add(el) {
 	console.log('List add', el);
-	el.xx.loopi.push(Math.random()*30|0);
+	el.$scope.loopi.push(Math.random()*30|0);
 	xx();
 }
 
 function list_del(el, data) {
 	console.log('List del', el, data);
-	el.xx.loopi.splice(el.xx.loopi.indexOf(data), 1);
+	el.$scope.loopi.splice(el.$scope.loopi.indexOf(data), 1);
 	xx();
 }
 
