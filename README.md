@@ -82,6 +82,23 @@ the keys as the "classname" and its value is an boolean expression for using or 
 </div>
 ```
 
+## xx-bind
+
+`xx-bind` bind to element properties and/or attributes. `xx-bind` expects an js-object. The
+key names of this js-object are the element property names to assign to, or the element
+attribute name, if prefixed with "$".
+
+```html
+<input xx-bind="{value: aValue, $foo: 42}"></input>
+```
+
+will do on every value change:
+
+```js
+elInput.value = aValue;
+elInput.setAttribute('foo', 42);
+```
+
 
 ## Re-render
 

@@ -233,6 +233,40 @@ xx = (function () {
 	}
 
 
+	class XxBind {
+		constructor(contentGenerator) {
+			Object.assign(this, {contentGenerator});
+		}
+
+		render(el, scope) {
+			const oldBind = el.xxBind || {};
+			const newBind = this.contentGenerator.call(el, scope);
+
+			try {
+				for (const an in newBind) {
+					const o = oldBind[an], n = newBind[an];
+					if (o != n) {
+						switch (an[0]) {
+						case '$':
+							// Set el attribute
+							if (xx.debug) console.log(`xx-bind el.setAttribute("${an.substr(1)}", ${n})`, el);
+							el.setAttribute(an.substr(1), n);
+						default:
+							// Set el property
+							if (xx.debug) console.log(`xx-bind el.${an} = ${n}`, el);
+							el[an] = n;
+							break;
+						}
+					}
+				}
+				el.xxBind = newBind;
+			} catch (err) {
+				console.log(`xxBind error`, el, newBind, err);
+			}
+		}
+	}
+
+
 	// Return a canonical Object
 	// "className" -> { className: true}
 	// ["cn1","cn2"] -> { cn1: true, cn2: true }
@@ -456,6 +490,11 @@ xx = (function () {
 			this.addXxFoo(el, new XxText(funcFromAttr(el, 'xx-text')));
 		},
 
+		_initXxBind(el) {
+			if (xx.debug) console.log('init xx-bind@', el);
+			this.addXxFoo(el, new XxBind(funcFromAttr(el, 'xx-bind')));
+		},
+
 		_initXxClass(el) {
 			if (xx.debug) console.log('init xx-class@', el);
 			this.addXxFoo(el, new XxClass(funcFromAttr(el, 'xx-class')));
@@ -518,6 +557,9 @@ xx = (function () {
 		_initTree(root = document, rootScope = {}) {
 			for (const el of root.querySelectorAll('[xx-text]')) {
 				this._initXxText(el);
+			}
+			for (const el of root.querySelectorAll('[xx-bind]')) {
+				this._initXxBind(el);
 			}
 			for (const el of root.querySelectorAll('[xx-class]')) {
 				this._initXxClass(el);
