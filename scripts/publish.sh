@@ -17,11 +17,13 @@ git pull
 
 npm run build
 
-echo 'Continue with "npm publish --dry-run"? Enter "y"'
-read yes
-[ "$yes" = 'y' ] || exit 1
-
-npm publish --dry-run
+#
+# Bug? Even with --dry-run, npm publish DOES publish!
+#echo 'Continue with "npm publish --dry-run"? Enter "y"'
+#read yes
+#[ "$yes" = 'y' ] || exit 1
+#
+#npm publish --dry-run
 
 echo 'Continue with "npm publish"? Enter "y"'
 read yes
