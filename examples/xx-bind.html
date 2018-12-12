@@ -17,8 +17,11 @@
 <body>
 	<h1>Bind to element properties and attributes</h1>
 	<p>
-		Event oninput: <input xx-bind="{value: aValue}" oninput="read_input(this)"> (Instant)<br>
-		Event onchange:<input xx-bind="{value: aValue}" onchange="read_input(this)"> (Lazy)<br>
+		Event oninput: <input xx-bind="{value: aValue}" oninput="this.$scope.aValue = value; xx();"> (Instant)<br> <!-- $scope from element -->
+		Event oninput: <input xx-bind="{value: aValue}" oninput="$scope.aValue = value; xx();"> (Instant)<br> <!-- handler run with "with(this) {cb}" (undocumented?) -->
+		Event oninput: <input xx-bind="{value: aValue}" oninput="aValue = value; xx();"> (Instant)<br> <!-- global var aValue -->
+		Event oninput: <input xx-bind="{value: aValue}" oninput="read_input(this)"> tolower (Instant)<br>
+		Event onchange:<input xx-bind="{value: aValue}" onchange="read_input(this)"> tolower (Lazy)<br>
 	</p>
 	<p>
 		Hi {{aValue}}!
@@ -34,10 +37,10 @@
 
 	<script>
 var src_code = document.body.innerHTML;
-let aValue = 'theValue';
+var aValue = 'theValue';
 
 function read_input(el) {
-	aValue = el.value; // Model update
+	aValue = el.value.toLowerCase(); // Model update
 	xx();
 }
 	</script>

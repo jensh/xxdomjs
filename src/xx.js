@@ -85,7 +85,7 @@ xx = (function () {
 		const elRoot = el.cloneNode(true);
 		const xxChildNodes = [];
 
-		elRoot.xx = newScope
+		elRoot.$scope = newScope
 		xx.propagateScope(elRoot, newScope);
 
 		return elRoot;
@@ -166,7 +166,7 @@ xx = (function () {
 		}
 
 		_updateChild(el, data) {
-			const scope = el.xx;
+			const scope = el.$scope;
 			scope[this.itemName] = data;
 			xx.renderTree(el);
 		}
@@ -535,7 +535,7 @@ xx = (function () {
 
 		renderNode(el) {
 			const xxFoo = this.getXxFromEl(el);
-			if (xxFoo) xxFoo.render(el, el.xx);
+			if (xxFoo) xxFoo.render(el, el.$scope);
 		},
 
 		renderTree(rootnode) {
@@ -547,14 +547,14 @@ xx = (function () {
 		},
 
 		propagateScope(rootnode, scope) {
-			rootnode.xx = scope;
+			rootnode.$scope = scope;
 			for (const el of this.getAllChildNodes(rootnode)) {
 				if (xx.debug) console.log('Assign scope', el, scope);
-				el.xx = scope;
+				el.$scope = scope;
 			}
 		},
 
-		_initTree(root = document, rootScope = {}) {
+		_initTree(root = document, rootScope = window) {
 			for (const el of root.querySelectorAll('[xx-text]')) {
 				this._initXxText(el);
 			}
@@ -588,13 +588,13 @@ xx = (function () {
 
 		_initialized: false,
 
-		init(root=document) {
+		init(root=document, rootScope=window) {
 			if (this._initialized) return;
 			this._initialized = true;
 
 			if (xx.debug) console.log('xxdom Initialize', root);
 
-			this._initTree(root, {});
+			this._initTree(root, rootScope);
 		},
 
 		render() {
