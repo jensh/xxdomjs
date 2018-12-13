@@ -196,7 +196,7 @@ xx = (function () {
 
 			const cond = !! this.condition(scope);
 			const oldcond = !! marker.xxCond;
-			const child = this.childEl || (this.childEl = this._createChild(scope));
+			const child = marker.childEl || (marker.childEl = this._createChild(scope));
 
 			if (cond != oldcond) {
 				if (cond) {
@@ -206,7 +206,7 @@ xx = (function () {
 					// Loose el with scope. Refresh tree later.
 					// This fixes checkbox.checked "if expressions"
 					// hiding a checkbox.
-					delete this.childEl;
+					delete marker.childEl;
 				}
 				marker.xxCond = cond;
 			}
