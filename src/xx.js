@@ -203,6 +203,10 @@ xx = (function () {
 					marker.parentNode.insertBefore(child, marker.nextSibling);
 				} else {
 					child.remove();
+					// Loose el with scope. Refresh tree later.
+					// This fixes checkbox.checked "if expressions"
+					// hiding a checkbox.
+					delete this.childEl;
 				}
 				marker.xxCond = cond;
 			}
