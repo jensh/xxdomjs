@@ -271,6 +271,17 @@ xx = (function () {
 	}
 
 
+	class XxComponent {
+		constructor(template) {
+			this.template = template;
+		}
+
+		paste(elTarget) {
+			elTarget.innerHTML = this.template.innerHTML;
+		}
+	}
+
+
 	// Return a canonical Object
 	// "className" -> { className: true}
 	// ["cn1","cn2"] -> { cn1: true, cn2: true }
@@ -400,6 +411,7 @@ xx = (function () {
 
 		templateExpression,
 		funcFromAttr,
+		components: new Map,
 
 		getAllChildNodes(rootnode = document) {
 			return rootnode.xxChildNodes || (rootnode.xxChildNodes = rootnode.querySelectorAll('[xxfoo-id]'));
@@ -446,6 +458,11 @@ xx = (function () {
 				this.xxInstances.set(id, foo);
 			}
 			foo.handler.push(xxFoo);
+		},
+
+		_initXxComponent(el) {
+			const name = el.getAttribute('xx-component');
+			this.components.set(name, new XxComponent(el));
 		},
 
 		_initXxForOrIf(el) {
@@ -559,6 +576,17 @@ xx = (function () {
 		},
 
 		_initTree(root = document, rootScope = window) {
+			// components first
+			for (const el of root.querySelectorAll('[xx-component]')) {
+				this._initXxComponent(el);
+			}
+
+			for (const [cname,comp] of [...this.components].reverse()) {
+				for (const el of root.querySelectorAll(cname)) {
+					comp.paste(el);
+				}
+			}
+
 			for (const el of root.querySelectorAll('[xx-text]')) {
 				this._initXxText(el);
 			}
