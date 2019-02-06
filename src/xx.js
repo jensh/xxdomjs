@@ -272,12 +272,24 @@ xx = (function () {
 
 
 	class XxComponent {
-		constructor(template) {
-			this.template = template;
+		constructor(templ) {
+			this.templ = templ;
 		}
 
 		paste(elTarget) {
-			elTarget.innerHTML = this.template.innerHTML;
+			const n = document.importNode(this.templ, true);
+
+			// Copy attributes to new node
+			for (const attr of elTarget.attributes) {
+				let v = attr.value;
+				switch (attr.name) {
+				case 'class':
+					v += ' ' + n.getAttribute('class'); // append class names
+					break;
+				}
+				n.setAttribute(attr.name, v);
+			}
+			elTarget.parentNode.replaceChild(n, elTarget);
 		}
 	}
 
@@ -411,7 +423,7 @@ xx = (function () {
 
 		templateExpression,
 		funcFromAttr,
-		components: new Map,
+		comps: new Map, // Components
 
 		getAllChildNodes(rootnode = document) {
 			return rootnode.xxChildNodes || (rootnode.xxChildNodes = rootnode.querySelectorAll('[xxfoo-id]'));
@@ -458,11 +470,6 @@ xx = (function () {
 				this.xxInstances.set(id, foo);
 			}
 			foo.handler.push(xxFoo);
-		},
-
-		_initXxComponent(el) {
-			const name = el.getAttribute('xx-component');
-			this.components.set(name, new XxComponent(el));
 		},
 
 		_initXxForOrIf(el) {
@@ -576,14 +583,23 @@ xx = (function () {
 		},
 
 		_initTree(root = document, rootScope = window) {
-			// components first
-			for (const el of root.querySelectorAll('[xx-component]')) {
-				this._initXxComponent(el);
+			// init Components
+			const troots = [root];
+			for (const el of root.querySelectorAll('template[xx-component]')) {
+				const name = el.getAttribute('xx-component');
+				if (el.content.childElementCount != 1) {
+					console.log(`xx-component requires exact one child element`, el);
+					continue;
+				}
+				const c = el.content.firstElementChild;
+				this.comps.set(name, new XxComponent(c));
+				troots.push(c); // allow nested templates
 			}
-
-			for (const [cname,comp] of [...this.components].reverse()) {
-				for (const el of root.querySelectorAll(cname)) {
-					comp.paste(el);
+			for (const [cname,comp] of this.comps) {
+				for (const troot of troots) {
+					for (const el of troot.querySelectorAll(cname)) {
+						comp.paste(el);
+					}
 				}
 			}
 

@@ -12,9 +12,8 @@
 	<h1>Hi There</h1>
 
 	<foo xx-scope="{number:1}"></foo>
-
 	<foo xx-scope="{number:2}"></foo>
-	<foo xx-scope="{number:2}"></foo>
+	<foo xx-scope="{number:3}"></foo>
 
 	<labellist xx-scope="{labellist:['btn1', 'btn2', 'btn3']}"></labellist>
 	<labellist xx-scope="{labellist:['btn4', 'btn5', 'btn6']}"></labellist>
@@ -24,13 +23,16 @@
 	</template>
 
 	<template xx-component="bar">
-		<button xx-text="label"></button>
+		<button xx-text="label" class="bar"></button>
 	</template>
 
-	<!-- You can use templates in templates, if defined earlier -->
+	<!-- You can use templates in templates -->
 	<template xx-component="labellist">
 		<ul>
-			<li xx-for="label of labellist">{{label}}<bar></bar></li>
+			<li xx-for="label of labellist">{{label}}
+				<!-- class from the component and the template will be concatenated -->
+				<bar class="barlabel"></bar>
+			</li>
 		</ul>
 	</div>
 
