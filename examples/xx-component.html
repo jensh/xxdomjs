@@ -23,7 +23,7 @@
 	</template>
 
 	<template xx-component="bar">
-		<button xx-text="label" class="bar"></button>
+		<button xx-text="label" class="bar" onclick="alert('Click:' + $scope.label)"></button>
 	</template>
 
 	<!-- You can use templates in templates -->
@@ -34,7 +34,12 @@
 				<bar class="barlabel"></bar>
 			</li>
 		</ul>
-	</div>
+	</template>
 
+	<h2>Source code</h2>
+	<pre xx-text="src_code"></pre>
+	<script>
+		var src_code = document.body.outerHTML;
+	</script>
 </body>
 </html>
