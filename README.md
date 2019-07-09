@@ -103,7 +103,7 @@ elInput.setAttribute('foo', 42);
 
 ## xx-component
 
-Define a new component with `<template xx-component="{name}">` and use it with its name `<{name}></{name>`:
+Define a new component with `<template xx-component="{name}">` and use it with its name `<{name}></{name}>`:
 ```html
 <abc></abc>
 <abc></abc>
