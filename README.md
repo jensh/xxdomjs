@@ -101,6 +101,18 @@ elInput.value = aValue;
 elInput.setAttribute('foo', 42);
 ```
 
+## xx-component
+
+Define a new component with `<template xx-component="{name}">` and use it with its name `<{name}></{name>`:
+```html
+<abc></abc>
+<abc></abc>
+
+<template xx-component="abc">
+	<div>The quick brown fox jumps over the lazy dog.</div>
+</template>
+```
+
 
 ## Re-render
 
