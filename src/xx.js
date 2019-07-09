@@ -587,11 +587,11 @@ xx = (function () {
 			const troots = [root];
 			for (const el of root.querySelectorAll('template[xx-component]')) {
 				const name = el.getAttribute('xx-component');
-				if (el.childElementCount != 1) {
-					console.log(`xx-component requires exact one child element`, el);
+				const c = el.content ? el.content.firstElementChild : el.firstElementChild;
+				if (!c) {
+					console.log(`xx-component require one child element`, el);
 					continue;
 				}
-				const c = el.firstElementChild;
 				this.comps.set(name, new XxComponent(c));
 				troots.push(c); // allow nested templates
 			}

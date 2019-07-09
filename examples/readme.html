@@ -12,10 +12,10 @@
 	font-family: apple color emoji,segoe ui emoji,noto color emoji,android emoji,emojisymbols,emojione mozilla,twemoji mozilla,segoe ui symbol;
 }
 	</style>
+	<script src="../src/xx.js"></script>
+	<!-- <script src="https://4k2.de/xxdomjs/dist/xx.min.js"></script> -->
 </head>
 <body>
-
-<script src="https://4k2.de/xxdomjs/dist/xx.min.js"></script>
 
 Hello {{ world + '!' }} <br>
 Today is: {{ (new Date).toDateString() }}.
@@ -69,6 +69,12 @@ var things = [
 	}, 1000);
 </script>
 
+<template xx-component="abc">
+	<div>The quick brown fox jumps over the lazy dog.</div>
+</template>
 
+<abc></abc>
+<abc></abc>
 
 </body>
+</html>
