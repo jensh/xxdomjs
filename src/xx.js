@@ -576,7 +576,7 @@ xx = (function () {
 
 			const marker =  document.createElement('script');
 			marker.type = 'xx-handlebar-marker';
-
+			el.textContent = ' ';
 			el.parentNode.insertBefore(marker, el); // Manipulate textnode after marker
 
 			this.addXxFoo(marker, new XxHandlebar(contentGen));
