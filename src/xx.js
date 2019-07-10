@@ -92,6 +92,11 @@ xx = (function () {
 	}
 
 
+	function createChild(template, scope) {
+		return cloneNode(template, createChildScope(scope))
+	}
+
+
 	class XxFor {
 		constructor(template, itemName, listFactory) {
 			Object.assign(this, { template, itemName, listFactory});
@@ -156,13 +161,9 @@ xx = (function () {
 		}
 
 		_createChild(data, scope) {
-			const newScope = createChildScope(scope);
-			const newNode = cloneNode(this.template, newScope);
-
-			// newScope[this.itemName] = data;
-			this._updateChild(newNode, data); // Call update before propagateScope!
-
-			return newNode;
+			const el = createChild(this.template, scope);
+			this._updateChild(el, data);
+			return el;
 		}
 
 		_updateChild(el, data) {
@@ -216,7 +217,7 @@ xx = (function () {
 		}
 
 		_createChild(scope) {
-			return cloneNode(this.template, createChildScope(scope));
+			return createChild(this.template, scope);
 		}
 	};
 
