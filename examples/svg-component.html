@@ -12,18 +12,16 @@
 	<h1>SVG Component</h1>
 
 	<svg width="150" height="50" viewBox="0 0 150 50">
-		<g xx-scope="{x: 0, color: 'red'}">
-			<smile />
-			<smile xx-scope="{x: 50, color: 'blue'}"/>
+		<g>
+			<smile xx-scope="{x: 0, color: 'red'}" />
+			<smile xx-scope="{x: 50, color: 'blue'}" />
 			<smile xx-scope="{x: 100, color: 'green'}" />
 
-			<template xx-component="smile">
-				<g xx-bind="{ $transform: `translate(${x} 0)`}" >
-					<circle cx="15" cy="20" r="4" xx-bind="{$fill: color}" />
-					<circle cx="35" cy="20" r="4" xx-bind="{$fill: color}" />
-					<path d="M10 40A20 20 0 0 0 40 40" fill="none" xx-bind="{$stroke: color}" stroke-width="5" fill="none"/>
-				</g>
-			</template>
+			<g xx-component="smile" xx-bind="{ $transform: `translate(${x} 0)`}" >
+				<circle cx="15" cy="20" r="4" xx-bind="{$fill: color}" />
+				<circle cx="35" cy="20" r="4" xx-bind="{$fill: color}" />
+				<path d="M10 40A20 20 0 0 0 40 40" fill="none" xx-bind="{$stroke: color}" stroke-width="5" fill="none"/>
+			</g>
 		</g>
 	</svg>
 
