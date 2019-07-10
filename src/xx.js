@@ -617,7 +617,8 @@ xx = (function () {
 
 			// Paste components
 			for (const [cname,comp] of this.comps) {
-				for (const el of root.querySelectorAll(cname)) {
+				// Use lowercase tag names to work also within SVG
+				for (const el of root.querySelectorAll(cname.toLowerCase())) {
 					comp.paste(el, rootScope);
 				}
 			}
