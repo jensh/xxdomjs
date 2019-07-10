@@ -81,19 +81,28 @@ xx = (function () {
 
 
 	// Clone a DOM node including its xx properties
-	function cloneNode(el, newScope) {
-		const elRoot = el.cloneNode(true);
-		const xxChildNodes = [];
+	function cloneNode(el, scope) {
+		const elRoot = el.xxCloneNode ? el.xxCloneNode(scope) : el.cloneNode(true);
 
-		elRoot.$scope = newScope
-		xx.propagateScope(elRoot, newScope);
+		elRoot.$scope = scope
+		xx.propagateScope(elRoot, scope);
 
 		return elRoot;
 	}
 
 
-	function createChild(template, scope) {
-		return cloneNode(template, createChildScope(scope))
+	function xxCloneNodeFromTmplFactory(el, tmplStr) {
+		const tmplExpr = templateExpression(tmplStr, el)
+
+		return function (scope) {
+			const name = tmplExpr(scope);
+			const comp = xx.comps.get(name);
+			if (!comp) {
+				console.log(`xx-tmpl="${tmplStr}" template "${name}" not found`, el);
+				return this.cloneNode(true);
+			}
+			return comp.cloneNode(el, scope);
+		}
 	}
 
 
@@ -113,7 +122,9 @@ xx = (function () {
 				// Fast path. Just create new nodes. (Initial exec or list was empty).
 				const nodes = document.createDocumentFragment();
 				for (const data of list) {
-					nodes.appendChild(this._createChild(data, scope));
+					const newNode = this._createChild(data, scope)
+					nodes.appendChild(newNode);
+					xx.renderTree(newNode);
 				}
 				marker.parentNode.insertBefore(nodes, marker.nextSibling);
 			} else {
@@ -128,31 +139,34 @@ xx = (function () {
 					case s_del: {
 						if (xx.debug) console.log('xx-for: del item', el);
 						parentNode.removeChild(el);
+						el = null;
 						break;
 					}
 					case s_add: {
 						const newNode = this._createChild(ed[1] /* data */, scope);
 						if (xx.debug) console.log('xx-for: add item', newNode, newNode.xxScope);
 						parentNode.insertBefore(newNode, el);
+						el = newNode;
 						break;
 					}
 					case s_replace: {
 						if (xx.debug) console.log('xx-for: replace item', el);
-						if (xx.recycleDOMnodes) {
+						if (xx.recycleDOMnodes && !this.template.xxCloneNode) {
 							this._updateChild(el, ed[2] /* data */);
 						} else {
 							const newNode = this._createChild(ed[2] /* data */, scope);
 							parentNode.replaceChild(newNode, el);
+							el = newNode;
 						}
 						break;
 					}
 					case s_keep:
 						// if (xx.debug) console.log('xx-for: keep item', el);
-						xx.renderTree(el);
 						break;
 					default:
 						console.assert(false);
 					}
+					if (el) xx.renderTree(el);
 					el = next;
 				}
 			}
@@ -161,15 +175,13 @@ xx = (function () {
 		}
 
 		_createChild(data, scope) {
-			const el = createChild(this.template, scope);
-			this._updateChild(el, data);
-			return el;
+			scope = createChildScope(scope);
+			scope[this.itemName] = data;
+			return cloneNode(this.template, scope);
 		}
 
 		_updateChild(el, data) {
-			const scope = el.$scope;
-			scope[this.itemName] = data;
-			xx.renderTree(el);
+			el.$scope[this.itemName] = data;
 		}
 	};
 
@@ -197,27 +209,24 @@ xx = (function () {
 
 			const cond = !! this.condition(scope);
 			const oldcond = !! marker.xxCond;
-			const child = marker.childEl || (marker.childEl = this._createChild(scope));
 
 			if (cond != oldcond) {
 				if (cond) {
+					const child = (marker.childEl = this._createChild(scope));
 					marker.parentNode.insertBefore(child, marker.nextSibling);
-				} else {
-					child.remove();
-					// Loose el with scope. Refresh tree later.
-					// This fixes checkbox.checked "if expressions"
-					// hiding a checkbox.
+				} else if (marker.childEl) {
+					marker.childEl.remove();
 					delete marker.childEl;
 				}
 				marker.xxCond = cond;
 			}
-			if (cond) {
-				xx.renderTree(child);
+			if (marker.childEl) {
+				xx.renderTree(marker.childEl);
 			}
 		}
 
 		_createChild(scope) {
-			return createChild(this.template, scope);
+			return cloneNode(this.template, scope);
 		}
 	};
 
@@ -256,6 +265,7 @@ xx = (function () {
 							// Set el attribute
 							if (xx.debug) console.log(`xx-bind el.setAttribute("${an.substr(1)}", ${n})`, el);
 							el.setAttribute(an.substr(1), n);
+							break;
 						default:
 							// Set el property
 							if (xx.debug) console.log(`xx-bind el.${an} = ${n}`, el);
@@ -277,20 +287,24 @@ xx = (function () {
 			this.templ = templ;
 		}
 
-		paste(elTarget) {
-			const n = document.importNode(this.templ, true);
+		paste(elTarget, scope) {
+			const el = this.cloneNode(elTarget, scope);
+			elTarget.parentNode.replaceChild(el, elTarget);
+		}
 
+		cloneNode(elTarget, scope) {
+			const el = cloneNode(this.templ, scope);
 			// Copy attributes to new node
 			for (const attr of elTarget.attributes) {
 				let v = attr.value;
 				switch (attr.name) {
 				case 'class':
-					v += ' ' + n.getAttribute('class'); // append class names
+					v += ' ' + el.getAttribute('class'); // append class names
 					break;
 				}
-				n.setAttribute(attr.name, v);
+				el.setAttribute(attr.name, v);
 			}
-			elTarget.parentNode.replaceChild(n, elTarget);
+			return el;
 		}
 	}
 
@@ -477,9 +491,14 @@ xx = (function () {
 			if (xx.debug) console.log('init xx-for/xx-if@', el);
 			const forStr = el.getAttribute('xx-for');
 			const ifStr = el.getAttribute('xx-if');
+			const tmplStr = el.getAttribute('xx-tmpl');
 			let ifCondition;
 			const marker =  document.createElement('script');
 			const template = el;
+
+			if (tmplStr) {
+				template.xxCloneNode = xxCloneNodeFromTmplFactory(template, tmplStr);
+			}
 
 			if (ifStr) {
 				template.removeAttribute('xx-if');
@@ -507,6 +526,7 @@ xx = (function () {
 			} else {
 				marker.type = 'xx-if-marker';
 				marker.setAttribute('xxCode', `if (${ifStr})…`);
+				if (!ifCondition) ifCondition = () => true;
 
 				this.addXxFoo(marker, new XxIf(template, ifCondition));
 			}
@@ -595,15 +615,10 @@ xx = (function () {
 				}
 				this.comps.set(name, new XxComponent(c));
 				troots.push(c); // allow nested templates
+				if (el.content) this._initTree(el.content, rootScope);
 			}
-			for (const [cname,comp] of this.comps) {
-				for (const troot of troots) {
-					for (const el of troot.querySelectorAll(cname)) {
-						comp.paste(el);
-					}
-				}
-			}
-
+/*
+*/
 			for (const el of root.querySelectorAll('[xx-text]')) {
 				this._initXxText(el);
 			}
@@ -620,9 +635,17 @@ xx = (function () {
 				this._initXxHandlebar(el);
 			}
 
+			// Paste components
+			for (const [cname,comp] of this.comps) {
+				for (const troot of troots) {
+					for (const el of troot.querySelectorAll(cname)) {
+						comp.paste(el, rootScope);
+					}
+				}
+			}
 			// ^templates must be initialized before initializing for/if control structures!
 
-			for (const el of root.querySelectorAll('[xx-for],[xx-if]')) {
+			for (const el of root.querySelectorAll('[xx-for],[xx-if],[xx-tmpl]')) {
 				this._initXxForOrIf(el);
 			}
 

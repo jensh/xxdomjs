@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-tmpl</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+</head>
+<body>
+	<h1>xx-tmpl examples</h1>
+
+	Step {{cnt}}
+
+	<foo xx-scope="{num: 14}">foo inner</foo>
+	<bar xx-scope="{num: cnt}">bar inner</bar>
+
+	<div xx-scope="{num: 'TheNum'}">
+
+		<h2>xx-tmpl</h2>
+
+		<!-- Static element. xx-tmpl evaluated only once -->
+		<div xx-tmpl="['foo','bar'][cnt % 2]" xx-scope="{num: 12}"></div>
+
+
+		<h2>xx-for with xx-tmpl</h2>
+
+		<!-- Loop with different templates -->
+		<div xx-for="num in ['foo','bar']" xx-tmpl="num" arg-from-for="1">for {{num}} {{cnt}}</div>
+
+
+		<h2>xx-if with xx-tmpl</h2>
+
+		<!-- xx-tmpl evaluated at node creation (if condition transition false-> true ) -->
+		num: {{num}} cnt:{{ cnt }}
+		<div xx-if="(cnt % 3) != 2" xx-tmpl="['foo','bar'][cnt % 2]">
+			if {{cnt}}
+		</div>
+	</div>
+
+	<h2>Templates</h2>
+	<template xx-component="foo" >
+		<div arg-from-template="1" xx-scope="{}">Foo num:<span xx-bind="{innerText:num}">inner span</span></div>
+	</template>
+	<template xx-component="bar">
+		<div>Bar num:{{ num }} cnt:{{cnt}}</div>
+	</template>
+
+	<h2>Source code</h2>
+	<pre xx-text="src_code"></pre>
+
+
+	<script>
+// xx.debug=true;
+var src_code = document.body.innerHTML;
+var cnt = 0;
+// var num = 'nonum';
+
+setInterval(function () {
+	// Step
+	cnt++;	xx();
+}, 3000);
+	</script>
+</body>
+</html>
