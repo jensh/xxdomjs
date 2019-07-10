@@ -605,26 +605,31 @@ xx = (function () {
 
 		_initTree(root = document, rootScope = window) {
 			// init Components
-			const troots = [root];
-			for (const el of root.querySelectorAll('template[xx-component]')) {
+			const templs = document.createDocumentFragment();
+			for (const el of root.querySelectorAll('[xx-component]')) {
 				const name = el.getAttribute('xx-component');
-				const c = el.content ? el.content.firstElementChild : el.firstElementChild;
-				if (!c) {
-					console.log(`xx-component require one child element`, el);
-					continue;
-				}
-				this.comps.set(name, new XxComponent(c));
-				troots.push(c); // allow nested templates
-				if (el.content) this._initTree(el.content, rootScope);
+				let tmpl = (el.content && el.content.firstElementChild) || el;
+				tmpl.removeAttribute('xx-component');
+				templs.appendChild(tmpl); // Move templ to list
+				this.comps.set(name, new XxComponent(tmpl)); // register
 			}
-/*
-*/
+			if (templs.firstChild) this._initTree(templs, rootScope);
+
+			// Paste components
+			for (const [cname,comp] of this.comps) {
+				for (const el of root.querySelectorAll(cname)) {
+					comp.paste(el, rootScope);
+				}
+			}
+
 			for (const el of root.querySelectorAll('[xx-text]')) {
 				this._initXxText(el);
 			}
+
 			for (const el of root.querySelectorAll('[xx-bind]')) {
 				this._initXxBind(el);
 			}
+
 			for (const el of root.querySelectorAll('[xx-class]')) {
 				this._initXxClass(el);
 			}
@@ -635,14 +640,6 @@ xx = (function () {
 				this._initXxHandlebar(el);
 			}
 
-			// Paste components
-			for (const [cname,comp] of this.comps) {
-				for (const troot of troots) {
-					for (const el of troot.querySelectorAll(cname)) {
-						comp.paste(el, rootScope);
-					}
-				}
-			}
 			// ^templates must be initialized before initializing for/if control structures!
 
 			for (const el of root.querySelectorAll('[xx-for],[xx-if],[xx-tmpl]')) {
