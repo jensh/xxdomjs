@@ -285,11 +285,16 @@ xx = (function () {
 	class XxComponent {
 		constructor(templ) {
 			this.templ = templ;
+			templ.xxComp = true;
 		}
 
 		paste(elTarget, scope) {
 			const el = this.cloneNode(elTarget, scope);
 			elTarget.parentNode.replaceChild(el, elTarget);
+			if (elTarget.xxComp) {
+				// pasted on other XxComponent
+				xx.comps.forEach(c => {if (c.templ === elTarget) c.templ = el;});
+			}
 		}
 
 		cloneNode(elTarget, scope) {
