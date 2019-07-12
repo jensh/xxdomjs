@@ -1,7 +1,12 @@
 /*
- * Copyright (c) 2018 Jens Hauke. All rights reserved.
+ * Copyright (c) 2018, 2019 Jens Hauke. All rights reserved.
  *
  * 2018-11-28 Jens Hauke <jens@4k2.de>
+ *
+ * Criss-cross incremental DOM renderer
+ * xxdom  https://github.com/jensh/xxdomjs
+ *
+ * Released under the MIT License.
  */
 
 xx = (function () {
