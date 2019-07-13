@@ -340,7 +340,7 @@ xx = (function () {
 		}
 
 		render(el, scope) {
-			const cssRaw = this.cssGenerator(scope);
+			const cssRaw = this.cssGenerator.call(el, scope);
 			const css = cssCanonical(cssRaw);
 			const oldCss = el.xxOldCss;// || [...el.classList]
 			const both = Object.assign({}, oldCss, css);
@@ -369,7 +369,7 @@ xx = (function () {
 		}
 
 		render(el, scope) {
-			const style = xx.styleFilter(this.styleGenerator(scope));
+			const style = xx.styleFilter(this.styleGenerator.call(el, scope));
 			const oldStyle = el.xxStyle || {};
 
 			for (const sName in style) {
@@ -572,7 +572,7 @@ xx = (function () {
 
 		_initXxScope(el) {
 			if (xx.debug) console.log('init xx-scope@', el);
-			const scope = funcFromAttr(el, 'xx-scope')();
+			const scope = funcFromAttr(el, 'xx-scope').call(el);
 			this.propagateScope(el, scope);
 		},
 
