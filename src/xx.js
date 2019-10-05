@@ -41,27 +41,25 @@ xx = (function () {
 		recycleDOMnodes: true, // Faster, but DOM nodes change scope on the fly (un-keyed)
 		_tmpl: {}, // templates
 
-		_applyTmpl(root, scope) {
-			for (const [cname, comp] of Object.entries(this._tmpl)) {
-				// Use lowercase tag names to work also within SVG
-				for (const el of root.querySelectorAll(cname.toLowerCase())) {
-					comp.paste(el, scope);
-				}
-			}
-		},
-
 		_initTree(root, scope) {
 			// init Components
+			const tmpls = this._tmpl;
 			for (const el of [...root.querySelectorAll('[xx-component]')].reverse()) {
 				const name = el.getAttribute('xx-component');
 				let tmpl = (el.content && el.content.firstElementChild) || el;
 				tmpl.removeAttribute('xx-component');
-				this._tmpl[name] = new XxTemplate(tmpl); // register
+				tmpls[name] = new XxTemplate(tmpl); // register
 			}
-			for (const [cname, comp] of Object.entries(this._tmpl)) {
-				this._applyTmpl(comp.tmpl, scope);
-			}
-			this._applyTmpl(root, scope);
+
+			// Expand components inside components and inside root
+			[...Object.values(tmpls), {tmpl: root}].forEach(t => {
+				for (const [cname, comp] of Object.entries(tmpls)) {
+					// Use lowercase tag names to work also within SVG
+					for (const el of t.tmpl.querySelectorAll(cname.toLowerCase())) {
+						comp.paste(el, scope);
+					}
+				}
+			});
 		},
 
 		init(root=document, rootScope=window) {
