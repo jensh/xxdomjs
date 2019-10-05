@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Component</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<style>
+		.fg-yellow {
+			color: yellow;
+		}
+		.bg-blue {
+			background: blue;
+		}
+	</style>
+</head>
+<body>
+	<h2>Usage before definition</h2>
+
+	<a></a>
+
+	<template xx-component="a">
+		<div>A</div>
+	</template>
+
+	<h2>Usage after definition</h2>
+
+	<template xx-component="b">
+		<div>B</div>
+	</template>
+
+	<b></b>
+
+	<h2>Recursive top down</h2>
+
+	<c1></c1>
+	<template xx-component="c1">
+		<c2></c2>
+	</template>
+	<template xx-component="c2">
+		<div>C</div>
+	</template>
+
+	<h2>Recursive bottom up</h2>
+
+	<d2></d2>
+
+	<template xx-component="d2">
+		<div>D</div>
+	</template>
+	<template xx-component="d1">
+		<d2></d2>
+	</template>
+
+	<h2>Recursive without template top down</h2>
+
+	<e1></e1>
+
+	<e2 xx-component="e1"></e2>
+	<div xx-component="e2">E</div>
+
+	<h2>Recursive without template bottom up</h2>
+
+	<f1></f1>
+
+	<div xx-component="f2">F</div>
+	<f2 xx-component="f1"></f2>
+
+	<h2>Merge classes from template and instance</h2>
+
+	Yellow-Blue: <g class="fg-yellow"></g><br>
+
+	<template xx-component="g">
+		<span class="bg-blue">***G***</span>
+	</template>
+
+
+
+	<template>
+		<div>Foo Bar</div>
+	</template>
+
+
+</body>
+</html>
