@@ -1,0 +1,10 @@
+.result.ok {
+	color: white;
+	background: green;
+}
+.result.fail {
+	color: black;
+	background: red;
+}
+.result {
+	padding: 0 5px;
