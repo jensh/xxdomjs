@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>If</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<style>
+		.fg-yellow {
+			color: yellow;
+		}
+		.bg-blue {
+			background: blue;
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+	<h2>Simple If</h2>
+	<div expect="show=false<br> true? <span>No</span>">
+		show={{show}}<br>
+		true? <span xx-if="show">Yes</span><span xx-if="!show">No</span>
+	</div>
+	<button onclick="show = !show; xx();">Toggle show</button>
+	<script>
+		let show = false;
+	</script>
+
+
+	<script src="expect.js"></script>
+</body>
+</html>

@@ -8,7 +8,11 @@
 (function () {
 	function compare() {
 		for (const el of document.querySelectorAll("[expect]")) {
-			const result = el.innerHTML.replace(/\s+/g, ' ').trim();
+			const elFilter = el.cloneNode(true);
+			// Filter out all "<template>" marker
+			[...elFilter.querySelectorAll("template")].forEach(el => el.parentNode.removeChild(el));
+
+			const result = elFilter.innerHTML.replace(/\s+/g, ' ').trim();
 			const expect = el.getAttribute("expect");
 
 			const resEl = document.createElement("div");
@@ -23,7 +27,9 @@ Expect:
   "${expect}"
 Result:
   "${result}"`;
-				console.log("Failed test:", el, "Result:\n" + result.replace(/"/g, "&quot;"));
+				const resQuoted = result.replace(/"/g, "&quot;");
+				console.log("Failed test:", el, "Result:\n" + resQuoted);
+				resEl.onclick = () => resEl.innerText = resQuoted;
 			}
 			el.parentNode.insertBefore(resEl, el.nextSibling);
 		}

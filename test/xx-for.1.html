@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>For</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<style>
+		.fg-yellow {
+			color: yellow;
+		}
+		.bg-blue {
+			background: blue;
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+	<h2>Simple For loop</h2>
+	<ul expect="<li>1</li><li>2</li>">
+		<li xx-for="i of [1,2]">{{i}}</li>
+	</ul>
+
+	<h2>Two loops</h2>
+	<ul expect="<li>1</li><li>2</li> <li>3</li><li>4</li>">
+		<li xx-for="i of [1,2]">{{i}}</li>
+		<li xx-for="i of [3,4]">{{i}}</li>
+	</ul>
+
+	<h2>Two loops 2</h2>
+	<ul expect="<li>1</li><li>2</li><li>3</li><li>4</li>">
+		<li xx-for="i of [1,2]">{{i}}</li><li xx-for="i of [3,4]">{{i}}</li>
+	</ul>
+
+	<h2>Two loops with data in between</h2>
+	<ul expect="<li>S</li> <li>1</li><li>2</li> <li>M</li> <li>3</li><li>4</li> <li>E</li>">
+		<li>S</li>
+		<li xx-for="i of [1,2]">{{i}}</li>
+		<li>M</li>
+		<li xx-for="i of [3,4]">{{i}}</li>
+		<li>E</li>
+	</ul>
+
+
+	<h2>Nested loops</h2>
+	<ul expect="<li> i=1 <ul> <li> 1..1 </li><li> 1..2 </li> </ul> </li><li> i=2 <ul> <li> 2..1 </li><li> 2..2 </li> </ul> </li>">
+		<li xx-for="i of [1,2]">
+			i={{i}}
+			<ul>
+				<li xx-for="j of [i + '..1', i + '..2']">
+					{{j}}
+				</li>
+			</ul>
+		</li>
+	</ul>
+
+
+	<script src="expect.js"></script>
+</body>
+</html>
