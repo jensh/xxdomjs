@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Handlebar</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<style>
+		.fg-yellow {
+			color: yellow;
+		}
+		.bg-blue {
+			background: blue;
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+	<h2>Constant String</h2>
+	<div expect="Hello">
+		{{"Hello"}}
+	</div>
+
+	<h2>Constant number</h2>
+	<div expect="42">
+		{{42}}
+	</div>
+
+	<h2>function</h2>
+	<div expect="fooBar">
+		{{foo("foo")}}
+	</div>
+	<script>
+		function foo(foo) {
+			return foo + "Bar";
+		}
+	</script>
+
+	<h2>Render Once</h2>
+	<div expect="1">
+		{{++xCount}}
+	</div>
+	<button onclick="xx()">Render</button>
+	<script>
+		let xCount = 0;
+	</script>
+
+	<script src="expect.js"></script>
+</body>
+</html>
