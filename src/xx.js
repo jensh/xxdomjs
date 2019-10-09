@@ -444,17 +444,22 @@ xx = (function () {
 		clone(scope) {
 			const ntree = new XxTree,
 			      nroot = ntree.el = this.el.cloneNode(true),
-			      // tree id -> new el
-			      idMap = new Map(
-				      [...nroot.querySelectorAll("[xx-tree]")].map(
-					      el => [ el.getAttribute("xx-tree"), el]));
+			      idMap = [];
+
+			// idMap[tree id] -> new el
+			for (const el of nroot.querySelectorAll("[xx-tree]")) {
+				idMap[el.getAttribute("xx-tree")] = el;
+			}
 
 			// Map nodes by tree id
-			ntree.nodes = [...this.nodes.map(
-				n => n.newScope(
-					idMap.get(n.el.getAttribute("xx-tree")),
-					scope)
-			)];
+			ntree.nodes = [];
+			for (const n of this.nodes) {
+				ntree.nodes.push(
+					n.newScope(
+						idMap[n.el.getAttribute("xx-tree")],
+						scope)
+				);
+			}
 			ntree.scope = scope;
 
 			return ntree;
