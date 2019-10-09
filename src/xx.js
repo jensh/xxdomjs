@@ -12,6 +12,14 @@
 xx = (function () {
 	'use strict';
 
+	function deb(...args) {
+		if (xx.debug) console.log(...args);
+	}
+
+	function elog(...args) {
+		console.log(...args);
+	}
+
 	const s_del = 1;
 	const s_add = 2;
 	const s_replace = 3;
@@ -86,7 +94,7 @@ xx = (function () {
 
 	class XxBase {
 		constructor(el, scope, gen) {
-			Object.assign(this, {el, scope, gen});
+			Object.assign(this, {el, scope, gen:gen || (()=>'')});
 		}
 
 		getVal() {
@@ -148,7 +156,6 @@ xx = (function () {
 						deb('xx-for: replace item', el);
 						if (xx.recycleDOMnodes /* && !this.template.xxCloneNode */) {
 							const n = chld[cpos++];
-							console.log(n);
 							n.scope[this.itemName] = ed[2];
 							n.render();
 						} else {
@@ -243,62 +250,32 @@ xx = (function () {
 	}
 
 
-	class XxBind {
-		constructor(contentGenerator) {
-			Object.assign(this, {contentGenerator});
-		}
-
-		render(el, scope) {
-			const oldBind = el.xxBind || {};
-			const newBind = this.contentGenerator.call(el, scope);
-
-			try {
-				for (const an in newBind) {
-					const o = oldBind[an], n = newBind[an];
-					if (o != n) {
-						switch (an[0]) {
-						case '$':
-							// Set el attribute
-							if (xx.debug) console.log(`xx-bind el.setAttribute("${an.substr(1)}", ${n})`, el);
-							el.setAttribute(an.substr(1), n);
-							break;
-						default:
-							// Set el property
-							if (xx.debug) console.log(`xx-bind el.${an} = ${n}`, el);
-							el[an] = n;
-							break;
-						}
-					}
+	class XxAttr extends XxBase {
+		render() {
+			const old = this.old || (this.old = {}),
+			      cur = this.getVal();
+			if (cur) for (const name in cur) {
+				const o = old[name], c = cur[name];
+				if (o != c) {
+					old[name] = c;
+					this.el.setAttribute(name, c);
 				}
-				el.xxBind = newBind;
-			} catch (err) {
-				console.log(`xxBind error`, el, newBind, err);
 			}
 		}
 	}
 
 
-	class XxTemplate {
-		constructor(tmpl) {
-			this.tmpl = tmpl;
-		}
-
-		insertAfter(elMarker, scope) {
-			const el = this.tmpl.cloneNode(true);
-			el.$scope = scope;
-
-			for (const c of [el, ...el.querySelectorAll("[xxfoo-id]")]) {
-				const xxFoo = getXxFoo(c);
-				if (xxFoo) {
-
+	class XxProp extends XxBase {
+		render() {
+			const old = this.old || (this.old = {}),
+			      cur = this.getVal();
+			if (cur) for (const name in cur) {
+				const o = old[name], c = cur[name];
+				if (o != c) {
+					this.el[name] = old[name] = c;
 				}
 			}
 		}
-
-		_createChild(scope) {
-			return cloneNode(this.template, scope);
-		}
-
 	}
 
 
@@ -317,54 +294,40 @@ xx = (function () {
 	}
 
 
-	class XxClass {
-		constructor(cssGenerator) {
-			Object.assign(this, {cssGenerator});
-		}
-
-		render(el, scope) {
-			const cssRaw = this.cssGenerator.call(el, scope);
-			const css = cssCanonical(cssRaw);
-			const oldCss = el.xxOldCss;// || [...el.classList]
-			const both = Object.assign({}, oldCss, css);
+	class XxClass extends XxBase {
+		render() {
+			const cssRaw = this.getVal(),
+			      css = cssCanonical(cssRaw),
+			      oldCss = this.old, // || [...el.classList]
+			      el = this.el,
+			      both = Object.assign({}, oldCss, css);
 
 			for (const cn in both) {
 				const n = !!css[cn],
 				      o = (oldCss ? oldCss[cn]: !n); // !oldCss: Force assignment on first step
 				if (!cn) continue;
 				if (o != n) {
-					try {
-						if (xx.debug) console.log(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw);
-						(n) ? el.classList.add(cn) : el.classList.remove(cn);
-					} catch (err) {
-						console.log(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw, err);
-					}
+					deb(`${n?'Add':'Remove'} class "${cn}"`, el, cssRaw);
+					(n) ? el.classList.add(cn) : this.el.classList.remove(cn);
 				}
 			}
-			el.xxOldCss = css;
+			el.old = css;
 		}
 	}
 
 
-	class XxStyle {
-		constructor(styleGenerator) {
-			Object.assign(this, {styleGenerator});
-		}
-
-		render(el, scope) {
-			const style = xx.styleFilter(this.styleGenerator.call(el, scope));
-			const oldStyle = el.xxStyle || {};
-
+	class XxStyle extends XxBase {
+		render() {
+			const style = this.getVal() || {},
+			      oldStyle = this.old || (this.old = {});
 			for (const sName in style) {
 				const sValue = style[sName];
 				const oldSValue = oldStyle[sName];
-
 				if (sValue != oldSValue) {
-					el.style[sName] = sValue;
-					if (xx.debug) console.log(`Update style ${sName}: ${sValue}`, el);
+					oldStyle[sName] = this.el.style[sName] = sValue;
+					deb(`Update style ${sName}: ${sValue}`, this.el);
 				}
 			}
-			el.xxStyle = style;
 		}
 	}
 
@@ -383,18 +346,6 @@ xx = (function () {
 				this,
 				elReplaceChild(document.createTextNode(this.old = ""), el),
 				scope);
-		}
-	}
-
-
-	class XxFooMulti {
-		constructor() {
-			this.handler = [];
-		}
-		render(el, scope) {
-			for (const h of this.handler) {
-				h.render(el, scope);
-			}
 		}
 	}
 
@@ -442,11 +393,17 @@ xx = (function () {
 				}
 			}
 
+
 			/*
-			 * xx-text
+			 * xx-*
 			 */
-			for (const el of root.querySelectorAll("[xx-text]")) {
-				nodes.push(new XxText(el, scope, elGetAttrExpression(el, "xx-text")));
+			for (const [xclass, xattr] of [
+				[XxText, "xx-text"], [XxAttr, "xx-attr"], [XxProp, "xx-prop"],
+				[XxClass, "xx-class"], [XxStyle, "xx-style"]]) {
+
+				for (const el of root.querySelectorAll(`[${xattr}]`)) {
+					nodes.push(new xclass(el, scope, elGetAttrExpression(el, xattr)));
+				}
 			}
 
 
@@ -468,50 +425,58 @@ xx = (function () {
 
 
 			if (!scope) {
-				nodes.forEach((n, i) => {
-					n.el.setAttribute("xx-tree", i);
+				// Assign a tree id to each used el
+				[...new Set(nodes.map(n => n.el))].forEach((el, i) => {
+					el.setAttribute("xx-tree", i);
 				});
 			}
 			return this;
 		}
 
 		render() {
-			for (const node of this.nodes) {
+			for (const node of this.nodes) try {
 				node.render();
+			} catch (err) {
+				elog(err, node);
 			}
 		}
 
 		clone(scope) {
 			const ntree = new XxTree,
-			      nnodes = ntree.nodes = [],
-			      nroot = ntree.el = this.el.cloneNode(true);
+			      nroot = ntree.el = this.el.cloneNode(true),
+			      // tree id -> new el
+			      idMap = new Map(
+				      [...nroot.querySelectorAll("[xx-tree]")].map(
+					      el => [ el.getAttribute("xx-tree"), el]));
+
+			// Map nodes by tree id
+			ntree.nodes = [...this.nodes.map(
+				n => n.newScope(
+					idMap.get(n.el.getAttribute("xx-tree")),
+					scope)
+			)];
 			ntree.scope = scope;
 
-			for (const el of nroot.querySelectorAll("[xx-tree]")) {
-				const idx = el.getAttribute("xx-tree");
-				nnodes[idx] = this.nodes[idx].newScope(el, scope);
-			}
 			return ntree;
 		}
 	}
 
-	function templateExpression(expressionString, el) {
-		if (!expressionString) return null;
-		deb('expr', expressionString, el);
-		const code = `with ($scope) return (${expressionString})`;
+	function templateExpression(exStr, el) {
+		if (!exStr) return null;
+		deb("Expr", el, exStr);
+		const code = `with ($scope) return (${exStr})`;
 		try {
 			const expr = Function("$scope", code);
 			return function (scope) {
 				try {
 					return expr.call(this, scope||0);
 				} catch (err) { // Expression errors
-					console.log(`Expression: ${JSON.stringify(expressionString)}`, err, el, scope);
+					elog(`Expr: ${exStr}`, err, el, scope);
 					return '';
 				}
 			}
 		} catch(err) { // Parsing errors
-			console.log(`Expression: ${JSON.stringify(expressionString)}`, el);
-			console.log(code, err);
+			elog(`Expr: ${exStr}`, el, code, err);
 			return null;
 		}
 	}
@@ -556,64 +521,50 @@ xx = (function () {
 		});
 	}
 
-	const xxFoos = [],
-	      xxComps = {};
 
-	function getXxFoo(el) {
-		return el.xxFoo || (
-			// cloned els loose there xxFoo. Get it again from its xxfoo-id.
-			el.xxFoo = xxFoos[el.getAttribute("xxfoo-id")|0 - 1]
-		);
-	}
+	const xxComps = {};
 
-	function addXxFoo(el, xxBar) {
-		if (!el.xxFoo) {
-			xxFoos.push(el.xxFoo = new XxFooMulti);
-			el.setAttribute('xxfoo-id', xxFoos.length);
+	function initComponents(root) {
+		// init Components
+		for (const el of root.querySelectorAll('[xx-component]')) {
+			const name = elGetAndDelAttribute(el, "xx-component");
+			let tmpl = (el.content && el.content.firstElementChild) || el;
+			xxComps[name] = new XxComponent(tmpl); // register
 		}
-		el.xxFoo.handler.push(xxBar);
+
+		// Expand components inside components and inside root
+		[...Object.values(xxComps), {tmpl: root}].forEach(t => {
+			for (const [cname, comp] of Object.entries(xxComps)) {
+				// Use lowercase tag names to work also within SVG
+				for (const el of t.tmpl.querySelectorAll(cname.toLowerCase())) {
+					comp.paste(el);
+				}
+			}
+		});
 	}
 
 
-	let xx = {
+	function initFors(root) {
+		for (const el of root.querySelectorAll('[xx-for],[xx-if],[xx-tmpl]')) {
+			const t = document.createElement("template");
+			elReplaceChild(t, el); // DOM: replace el by template
+			t.content.append(el);
+			t.setAttribute("xx-ctrl", "");
+		}
+	}
+
+
+	let xx = Object.assign(render, {
 		debug: false,
 		noinit: false,
 		recycleDOMnodes: true, // Faster, but DOM nodes change scope on the fly (un-keyed)
 
-		_initComponents(root) {
-			// init Components
-			for (const el of root.querySelectorAll('[xx-component]')) {
-				const name = elGetAndDelAttribute(el, "xx-component");
-				let tmpl = (el.content && el.content.firstElementChild) || el;
-				xxComps[name] = new XxComponent(tmpl); // register
-			}
-
-			// Expand components inside components and inside root
-			[...Object.values(xxComps), {tmpl: root}].forEach(t => {
-				for (const [cname, comp] of Object.entries(xxComps)) {
-					// Use lowercase tag names to work also within SVG
-					for (const el of t.tmpl.querySelectorAll(cname.toLowerCase())) {
-						comp.paste(el);
-					}
-				}
-			});
-		},
-
-
-		_initFors(root) {
-			for (const el of root.querySelectorAll('[xx-for],[xx-if],[xx-tmpl]')) {
-				const t =  document.createElement("template");
-				elReplaceChild(t, el); // DOM: replace el by template
-				t.content.append(el);
-				t.setAttribute("xx-ctrl", "");
-			}
-		},
 
 		init(root=document, scope=window) {
 			delete this.init; // call init only once
 			deb('xx.init()');
-			this._initComponents(root);
-			this._initFors(root);
+			initComponents(root);
+			initFors(root);
 			this.tree = (new XxTree).init(root, scope);
 		},
 
@@ -622,35 +573,34 @@ xx = (function () {
 			deb('xx.render()');
 			this.tree.render();
 		}
-	};
+	});
 
-	function deb(...args) {
-		if (xx.debug) console.log(...args);
-	}
-
-	try {
-		xx.noinit = document.currentScript.src.indexOf('#noinit') > 0;
-		xx.debug = document.currentScript.src.indexOf('#debug') > 0;
-	} catch (err) {
-	}
-
-	// Render all nodes after DOMContentLoaded
-	if (!xx.noinit) {
-		if (document.readyState === "loading") {
-			document.addEventListener("DOMContentLoaded", render);
-		} else {  // `DOMContentLoaded` already fired
-			render();
-		}
-	}
 
 	function render() {
 		try {
 			// Calling xx() is forwarded to xx.render().
 			xx.render();
 		} catch (err) {
-			console.log(err);
+			elog(err);
 		}
 	}
 
-	return xx = Object.assign(render, xx);
+
+	try {
+		const src = document.currentScript.src;
+		xx.noinit = src.indexOf('#noinit') > 0;
+		xx.debug = src.indexOf('#debug') > 0;
+	} catch (err) {
+	}
+
+	// Render all nodes after DOMContentLoaded
+	if (!xx.noinit) {
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", xx);
+		} else {  // `DOMContentLoaded` already fired
+			xx();
+		}
+	}
+
+	return xx;
 }());
