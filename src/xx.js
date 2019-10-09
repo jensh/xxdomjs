@@ -122,10 +122,10 @@ xx = (function () {
 				elInsertAfter(this.el, nodes);
 			} else {
 				// Mutate old list into new list.
-				let el = this.el.nextSibling;
-				const parentNode = marker.parentNode;
-				const chld = this.children;
-				const cpos = 0;
+				const parentNode = this.el.parentNode,
+				      chld = this.children;
+				let el = this.el.nextSibling,
+				    cpos = 0;
 
 				for (const ed of array_diff(oldlist, list)) {
 					let next = (ed[0] == s_add) ? el : el.nextSibling;
@@ -147,9 +147,9 @@ xx = (function () {
 					case s_replace: {
 						deb('xx-for: replace item', el);
 						if (xx.recycleDOMnodes /* && !this.template.xxCloneNode */) {
-							this._updateChild(el, ed[2] /* data */);
 							const n = chld[cpos++];
-							n.scope = ed[2];
+							console.log(n);
+							n.scope[this.itemName] = ed[2];
 							n.render();
 						} else {
 							const newNode = this._createChild(ed[2] /* data */);
@@ -159,13 +159,14 @@ xx = (function () {
 						break;
 					}
 					case s_keep:
-						// if (xx.debug) console.log('xx-for: keep item', el);
+						deb('xx-for: keep item', el);
 						chld[cpos++].render();
 						break;
 					}
 					el = next;
 				}
 			}
+			this.old = list;
 		}
 
 		_createChild(data) {
@@ -481,15 +482,16 @@ xx = (function () {
 		}
 
 		clone(scope) {
-			const tree = new XxTree,
-			      nnodes = tree.nodes = [],
-			      nroot = tree.el = this.el.cloneNode(true);
+			const ntree = new XxTree,
+			      nnodes = ntree.nodes = [],
+			      nroot = ntree.el = this.el.cloneNode(true);
+			ntree.scope = scope;
 
 			for (const el of nroot.querySelectorAll("[xx-tree]")) {
 				const idx = el.getAttribute("xx-tree");
 				nnodes[idx] = this.nodes[idx].newScope(el, scope);
 			}
-			return tree;
+			return ntree;
 		}
 	}
 
