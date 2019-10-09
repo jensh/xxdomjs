@@ -111,13 +111,13 @@ xx = (function () {
 		constructor(marker, scope, gen, itemName, template) {
 			super(marker, scope, gen);
 			Object.assign(this, {itemName, template});
-			this.children = [];
+			this.chld = [];
 		}
 
 		render() {
 			const list = [...(this.getVal() || [])], // Clone list-> Disallow mutation.-> Keep in sync with DOM
 			      oldlist = this.old || [],
-			      chld = this.children;
+			      chld = this.chld;
 
 			if (oldlist.length == 0) {
 				// Fast path. Just create new nodes. (Initial exec or list was empty).
