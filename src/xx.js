@@ -115,9 +115,9 @@ xx = (function () {
 		}
 
 		render() {
-			const list = [...(this.getVal() || [])]; // Clone list-> Disallow mutation.-> Keep in sync with DOM
-
-			const oldlist = this.old || [];
+			const list = [...(this.getVal() || [])], // Clone list-> Disallow mutation.-> Keep in sync with DOM
+			      oldlist = this.old || [],
+			      chld = this.children;
 
 			if (oldlist.length == 0) {
 				// Fast path. Just create new nodes. (Initial exec or list was empty).
@@ -125,13 +125,13 @@ xx = (function () {
 				for (const data of list) {
 					const newNode = this._createChild(data);
 					nodes.appendChild(newNode.el);
-					this.children.push(newNode);
+					chld.push(newNode);
 				}
+				renderAll();
 				elInsertAfter(this.el, nodes);
 			} else {
 				// Mutate old list into new list.
-				const parentNode = this.el.parentNode,
-				      chld = this.children;
+				const parentNode = this.el.parentNode;
 				let el = this.el.nextSibling,
 				    cpos = 0;
 
@@ -172,18 +172,21 @@ xx = (function () {
 					}
 					el = next;
 				}
+				renderAll();
 			}
 			this.old = list;
+
+			function renderAll() {
+				for (const c of chld) c.render();
+			}
 		}
 
 		_createChild(data) {
 			const s = createChildScope(this.scope);
 			s[this.itemName] = data;
-			const t = this.template.clone(s);
-			t.render();
-			return t;
+			return this.template.clone(s);
 		}
-	};
+	}
 
 
 	class XxIf extends XxBase {
