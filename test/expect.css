@@ -2,6 +2,11 @@
 	color: white;
 	background: green;
 }
+.result.ok pre {
+	color: black;
+	background: white;
+	border: 1px solid black;
+}
 .result.fail {
 	color: black;
 	background: red;

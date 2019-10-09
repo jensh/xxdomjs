@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Basics</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+	<h2>{{'{{}}'}}</h2>
+	<div expect="Hello-World">
+		{{"Hello"}}-{{"World"}}
+	</div>
+
+	for (const [xclass, xattr] of [
+				[XxText, "xx-text"], [XxAttr, "xx-attr"], [XxProp, "xx-prop"],
+				[XxClass, "xx-class"], [XxStyle, "xx-style"]]) {
+
+	<h2>xx-text</h2>
+
+	<div expect="<span xx-text=&quot;'xx-text'&quot;>xx-text</span>">
+		<span xx-text="'xx-text'">Content</span>
+	</div>
+
+	<h2>xx-attr</h2>
+
+	<div expect="<input xx-attr=&quot;{value:'val'}&quot; value=&quot;val&quot;>">
+		<input xx-attr="{value:'val'}">
+	</div>
+
+	<h2>xx-prop</h2>
+
+	<div expect="<div xx-prop=&quot;{innerHTML:'innerHTML'}&quot;>innerHTML</div>">
+		<div xx-prop="{innerHTML:'innerHTML'}">Content</div>
+	</div>
+
+	<h2>xx-style</h2>
+
+	<div expect="<div xx-style=&quot;{'background-color':'yellow'}&quot; style=&quot;background-color: yellow;&quot;>Yellow</div>">
+		<div xx-style="{'background-color':'yellow'}">Yellow</div>
+	</div>
+
+	<h2>xx-class</h2>
+
+	<div expect="<div xx-class=&quot;'foo'&quot; class=&quot;foo&quot;>foo</div>">
+		<div xx-class="'foo'">foo</div>
+	</div>
+
+	<h2>xx-class with {}</h2>
+
+	<div expect="<div xx-class=&quot;{bar: 1, foo: 0}&quot; class=&quot;bar&quot;>bar</div>">
+		<div xx-class="{bar: 1, foo: 0}">bar</div>
+	</div>
+
+	<h2>xx-class and class with {}</h2>
+
+	<div expect="<div xx-class=&quot;{bar: 1, foo: 2}&quot; class=&quot;baz bar foo&quot;>bar</div>">
+		<div xx-class="{bar: 1, foo: 2}" class="baz">bar</div>
+	</div>
+
+
+	<h2>Multiple xx-?</h2>
+	<div expect="<div xx-text=&quot;'Multi'&quot; xx-style=&quot;{'background-color':'yellow'}&quot; style=&quot;background-color: yellow;&quot;>Multi</div>">
+		<div xx-text="'Multi'" xx-style="{'background-color':'yellow'}">Content</div>
+	</div>
+	
+	<script src="expect.js"></script>
+</body>
+</html>

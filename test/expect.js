@@ -18,8 +18,9 @@
 			const resEl = document.createElement("div");
 			resEl.classList.add("result");
 			if (result == expect) {
-				resEl.innerText = "Ok";
+				resEl.innerHTML = "Ok<pre></pre>";
 				resEl.classList.add("ok");
+				resEl.firstElementChild.innerText = result;
 			} else {
 				resEl.classList.add("fail");
 				resEl.innerText = `Failed!
@@ -31,6 +32,7 @@ Result:
 				console.log("Failed test:", el, "Result:\n" + resQuoted);
 				resEl.onclick = () => resEl.innerText = resQuoted;
 			}
+
 			el.parentNode.insertBefore(resEl, el.nextSibling);
 		}
 	}

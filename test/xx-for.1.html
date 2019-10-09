@@ -7,14 +7,6 @@
 	<meta name="author" content="Jens Hauke"/>
 
 	<script src="../src/xx.js#debug"></script>
-	<style>
-		.fg-yellow {
-			color: yellow;
-		}
-		.bg-blue {
-			background: blue;
-		}
-	</style>
 	<link rel="stylesheet" type="text/css" href="expect.css" />
 </head>
 <body>
@@ -56,6 +48,25 @@
 		</li>
 	</ul>
 
+
+	<h2>Interactive</h2>
+	<ul>
+		<li xx-for="i of iarr">
+			{{i.txt}}<button onclick="idel(i)" xx-prop="{i}" xx-text="'Del'">del</button>
+		</li>
+		<button onclick="iadd()">add</button>
+	</ul>
+	<script>
+		const iarr = [{ txt: "1st"}];
+		function iadd() {
+			iarr.push({ txt: "" + new Date});
+			xx();
+		}
+		function idel(i) {
+			iarr.splice(iarr.indexOf(i),1);
+			xx();
+		}
+	</script>
 
 	<script src="expect.js"></script>
 </body>
