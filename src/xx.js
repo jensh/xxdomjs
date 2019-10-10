@@ -154,7 +154,7 @@ xx = (function () {
 					}
 					case s_replace: {
 						deb('xx-for: replace item', el);
-						if (xx.recycleDOMnodes /* && !this.template.xxCloneNode */) {
+						if (xx.recycleDOMnodes && !this.template.tmpl /* instanceof XXTmpl? */ ) {
 							const n = chld[cpos++];
 							n.scope[this.itemName] = ed[2];
 							n.render();
@@ -238,6 +238,7 @@ xx = (function () {
 				}
 				el.setAttribute(attr.name, v);
 			}
+			return el;
 		}
 	}
 
@@ -365,6 +366,23 @@ xx = (function () {
 		}
 	}
 
+
+	class XxTmpl extends XxBase {
+		clone(scope) {
+			this.scope = scope;
+			this.tmpl = this.el.content;
+
+			const name = this.getVal(),
+			      c = xxComps[name] || (
+				      elog(`xx-tmpl="${name}" not found`),
+				      this // Fallback to this.el.content
+			      );
+
+			return (c.tree || (c.tree = (new XxTree).init(c.tmpl, null))).clone(scope);
+		}
+	}
+
+
 	class XxTree {
 		init(root, scope) {
 			Object.assign(this, {el: root, scope});
@@ -374,11 +392,11 @@ xx = (function () {
 			 * controls
 			 */
 			for (const el of root.querySelectorAll("template[xx-ctrl]")) {
-				const t = (new XxTree).init(el.content, null),
-				      c = el.content.firstElementChild, // template
+				const c = el.content.firstElementChild, // template
 				      forStr = elGetAndDelAttribute(c, "xx-for"),
-				      ifCondition = elGetAndDelAttrExpression(c, "xx-if");
-				// const tmplSelect = elGetAndDelAttrExpression(el, "xx-tmpl");
+				      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
+				      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
+				      t = tmplSelect ? new XxTmpl(el, scope, tmplSelect) : (new XxTree).init(el.content, null)
 
 				if (forStr) {
 					const [, itemName, listFactoryStr] =
@@ -392,7 +410,7 @@ xx = (function () {
 					}
 					nodes.push(new XxFor(el, scope, listFactory, itemName, t));
 				} else {
-					nodes.push(new XxIf(el, scope, ifCondition, t));
+					nodes.push(new XxIf(el, scope, ifCondition || (()=>true), t));
 				}
 			}
 
