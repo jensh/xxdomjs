@@ -367,6 +367,10 @@ xx = (function () {
 	}
 
 
+	const xxComps = {},
+	      el2Scope = new WeakMap;
+
+
 	class XxTmpl extends XxBase {
 		clone(scope) {
 			this.scope = scope;
@@ -387,6 +391,7 @@ xx = (function () {
 		constructor(root, scope, treeTmpl) {
 			Object.assign(this, {el: root, scope});
 			const nodes = this.nodes = [];
+			el2Scope.set(root.firstElementChild, scope); // root instanceof DocumentFragment!
 
 			if (treeTmpl) {
 				// Construct from tree template
@@ -546,8 +551,6 @@ xx = (function () {
 	}
 
 
-	const xxComps = {};
-
 	function initComponents(root) {
 		// init Components
 		for (const el of root.querySelectorAll('[xx-component]')) {
@@ -596,6 +599,13 @@ xx = (function () {
 			if (this.init) this.init();
 			deb('xx.render()');
 			this.tree.render();
+		},
+
+		// Return scope of element el
+		scope(el) {
+			let s;
+			while (el && !(s = el2Scope.get(el))) el = el.parentNode;
+			return s;
 		}
 	});
 
@@ -614,6 +624,13 @@ xx = (function () {
 		const src = document.currentScript.src;
 		xx.noinit = src.indexOf('#noinit') > 0;
 		xx.debug = src.indexOf('#debug') > 0;
+
+		// Hack?
+		Object.defineProperty(HTMLElement.prototype, "$scope", {
+			get() {
+				return xx.scope(this);
+			}
+		});
 	} catch (err) {
 	}
 
@@ -625,6 +642,7 @@ xx = (function () {
 			xx();
 		}
 	}
+
 
 	return xx;
 }());
