@@ -378,15 +378,34 @@ xx = (function () {
 				      this // Fallback to this.el.content
 			      );
 
-			return (c.tree || (c.tree = (new XxTree).init(c.tmpl, null))).clone(scope);
+			return (c.tree || (c.tree = new XxTree(c.tmpl, null))).clone(scope);
 		}
 	}
 
 
 	class XxTree {
-		init(root, scope) {
+		constructor(root, scope, treeTmpl) {
 			Object.assign(this, {el: root, scope});
 			const nodes = this.nodes = [];
+
+			if (treeTmpl) {
+				// Construct from tree template
+				const idMap = [];
+
+				// idMap[tree id] -> new el
+				for (const el of root.querySelectorAll("[xx-tree]")) {
+					idMap[el.getAttribute("xx-tree")] = el;
+				}
+
+				// Map nodes by tree id
+				for (const n of treeTmpl.nodes) {
+					nodes.push(n.newScope(
+						idMap[n.el.getAttribute("xx-tree")],
+						scope));
+				}
+				return;
+			}
+
 
 			/*
 			 * controls
@@ -396,7 +415,7 @@ xx = (function () {
 				      forStr = elGetAndDelAttribute(c, "xx-for"),
 				      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
 				      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
-				      t = tmplSelect ? new XxTmpl(el, scope, tmplSelect) : (new XxTree).init(el.content, null)
+				      t = tmplSelect ? new XxTmpl(el, scope, tmplSelect) : new XxTree(el.content, null)
 
 				if (forStr) {
 					const [, itemName, listFactoryStr] =
@@ -451,7 +470,6 @@ xx = (function () {
 					el.setAttribute("xx-tree", i);
 				});
 			}
-			return this;
 		}
 
 		render() {
@@ -463,27 +481,7 @@ xx = (function () {
 		}
 
 		clone(scope) {
-			const ntree = new XxTree,
-			      nroot = ntree.el = this.el.cloneNode(true),
-			      idMap = [];
-
-			// idMap[tree id] -> new el
-			for (const el of nroot.querySelectorAll("[xx-tree]")) {
-				idMap[el.getAttribute("xx-tree")] = el;
-			}
-
-			// Map nodes by tree id
-			ntree.nodes = [];
-			for (const n of this.nodes) {
-				ntree.nodes.push(
-					n.newScope(
-						idMap[n.el.getAttribute("xx-tree")],
-						scope)
-				);
-			}
-			ntree.scope = scope;
-
-			return ntree;
+			return new XxTree(this.el.cloneNode(true), scope, this);
 		}
 	}
 
@@ -591,7 +589,7 @@ xx = (function () {
 			deb('xx.init()');
 			initComponents(root);
 			initFors(root);
-			this.tree = (new XxTree).init(root, scope);
+			this.tree = new XxTree(root, scope);
 		},
 
 		render() {
