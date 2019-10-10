@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Tmpl</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+	<h2>content from template</h2>
+	<div expect="<div>A</div>">
+		<span xx-tmpl="'A'">Nix</span>
+	</div>
+
+	<h2>xx-if content from template</h2>
+	<div expect="<div>A</div>">
+		<span xx-if="true" xx-tmpl="'A'">Nix</span>
+	</div>
+
+	<h2>xx-for content from template</h2>
+	<div expect="<div>A</div>">
+		<span xx-for="n of ['A']" xx-tmpl="n">Nix</span>
+	</div>
+
+	<h2>xx-for content from template, two elements</h2>
+	<div expect="<div>A</div><div>B</div>">
+		<span xx-for="n of ['A', 'B']" xx-tmpl="n">Nix</span>
+	</div>
+
+	<h2>content from unknown template</h2>
+	<div expect="<span>Nix</span>">
+		<span xx-tmpl="'TestTmplFailing'">Nix</span>
+	</div>
+
+	<h2>xx-for content from unknown template</h2>
+	<div expect="<span>Nix</span>">
+		<span xx-for="n of ['TestTmplFailing']" xx-tmpl="n">Nix</span>
+	</div>
+
+	<h2>xx-if content from unknown template</h2>
+	<div expect="<span>Nix</span>">
+		<span xx-if="true" xx-tmpl="'TestTmplFailing'">Nix</span>
+	</div>
+
+
+	<h2>xx-for with computed content in template</h2>
+	<div expect="<div>A</div><div>c:C Foo</div><span>NoTemplate:TestTmplFailing Foo</span>">
+		<span xx-for="val of ['A', varC, 'TestTmplFailing']" xx-tmpl="val">NoTemplate:{{val}} {{fooVal}}</span>
+	</div>
+	<button onclick="fooVal +='.';xx()">Add .</button>
+	<button onclick="varC = varC == 'C' ? 'A' : 'C';xx()">Toggle C</button>
+	<script>
+		let fooVal = "Foo",
+		    varC = "C";
+	</script>
+
+	<template xx-component="A">
+		<div>A</div>
+	</template>
+	<template xx-component="B">
+		<div>B</div>
+	</template>
+	<template xx-component="C">
+		<div>c:{{val}} {{fooVal}}</div>
+	</template>
+
+	<script src="expect.js"></script>
+</body>
+</html>
