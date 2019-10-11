@@ -615,11 +615,17 @@ xx = (function () {
 		}
 	});
 
-
-	function render() {
+	let rsched;
+	function render(wait) {
 		try {
-			// Calling xx() is forwarded to xx.render().
-			xx.render();
+			if (wait === undefined) {
+				xx.render();
+			} else if (!rsched) {
+				rsched = setTimeout(() => {
+					rsched = false;
+					render();
+				}, wait);
+			}
 		} catch (err) {
 			elog(err);
 		}
@@ -634,6 +640,7 @@ xx = (function () {
 		// Hack?
 		Object.defineProperty(HTMLElement.prototype, "$scope", {
 			get() {
+				render(0); // render in next tick
 				return xx.scope(this);
 			}
 		});
@@ -645,7 +652,7 @@ xx = (function () {
 		if (document.readyState === "loading") {
 			document.addEventListener("DOMContentLoaded", xx);
 		} else {  // `DOMContentLoaded` already fired
-			xx();
+			xx(0);
 		}
 	}
 
