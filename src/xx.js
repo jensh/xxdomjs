@@ -194,12 +194,11 @@ xx = (function () {
 			super(marker, scope, ifCondition);
 			this.tmpl = tmpl;
 			this.old = false;
-			this.chld = [];
 		}
 
 		render() {
 			let cond = !! this.getVal(),
-			    c = this.chld[0],
+			    c = (this.chld || (this.chld = []))[0],
 			    ce;
 
 			if (cond != this.old) {
