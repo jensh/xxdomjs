@@ -207,10 +207,9 @@ xx = (function () {
 
 				// Assign scope on demand:
 				c = c || (this.chld[0] = this.tmpl.clone(this.scope));
-				ce = c.el.firstElementChild; // Remember first node of DocumentFragment c.el
 
-				cond	? elInsertAfter(this.el, ce)
-					: this.el.parentNode.removeChild(ce);
+				cond	? elInsertAfter(this.el, c.el)
+					: this.el.parentNode.removeChild(c.el);
 			}
 			if (cond) c.render();
 		}
@@ -405,6 +404,7 @@ xx = (function () {
 						idMap[n.el.getAttribute("xx-tree")],
 						scope));
 				}
+				this.el = this.el.firstElementChild;
 				return;
 			}
 
@@ -417,7 +417,7 @@ xx = (function () {
 				      forStr = elGetAndDelAttribute(c, "xx-for"),
 				      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
 				      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
-				      t = tmplSelect ? new XxTmpl(el, scope, tmplSelect) : new XxTree(el.content, null)
+				      t = tmplSelect ? new XxTmpl(el, null, tmplSelect) : new XxTree(el.content, null)
 
 				if (forStr) {
 					const [, itemName, listFactoryStr] =
@@ -602,15 +602,16 @@ xx = (function () {
 		scope(el) {
 			deb("xx.scope()", el);
 			const elChain = new Set;
-			while (el) elChain.add(el = el.parentNode);
+			while (elChain.add(el), el = el.parentNode);
 
 			return find(this.tree).scope;
 
 			function find(xxFoo) {
-				for (const n of xxFoo.chld) if (n.chld && elChain.has(n.el)) {
-					return find(n);
+				for (const n of xxFoo.chld) if (n.chld) {
+					const r = find(n);
+					if (r) return r;
 				}
-				return xxFoo;
+				return elChain.has(xxFoo.el) && xxFoo;
 			}
 		}
 	});
