@@ -93,37 +93,39 @@ xx = (function () {
 
 
 	class XxBase {
-		constructor(el, scope, gen) {
-			Object.assign(this, {el, scope, gen:gen || (()=>'')});
+		constructor(el, gen) {
+			Object.assign(this, {el, gen:gen || (()=>'')});
 		}
 
-		getVal() {
-			return this.gen.call(this.el, this.scope);
+		getVal(scope) {
+			return this.gen.call(this.el, scope);
 		}
 
-		newScope(el, scope) {
-			return Object.assign(Object.create(this), {el, scope});
+		newEl(el) {
+			return Object.assign(Object.create(this), {el});
 		}
 	}
 
 
 	class XxFor extends XxBase {
-		constructor(marker, scope, gen, itemName, template) {
-			super(marker, scope, gen);
-			Object.assign(this, {itemName, template});
+		constructor(marker, gen, itemName, tmpl) {
+			super(marker, gen);
+			Object.assign(this, {itemName, tmpl});
 			this.chld = [];
 		}
 
-		render() {
-			const list = [...(this.getVal() || [])], // Clone list-> Disallow mutation.-> Keep in sync with DOM
+		render(scope) {
+			const list = [...(this.getVal(scope) || [])], // Clone list-> Disallow mutation.-> Keep in sync with DOM
 			      oldlist = this.old || [],
-			      chld = this.chld;
+			      chld = this.chld,
+			      itemName = this.itemName,
+			      tmpl = this.tmpl;
 
 			if (oldlist.length == 0) {
 				// Fast path. Just create new nodes. (Initial exec or list was empty).
 				const nodes = document.createDocumentFragment();
 				for (const data of list) {
-					const newNode = this._createChild(data);
+					const newNode = createChild(data);
 					nodes.appendChild(newNode.el);
 					chld.push(newNode);
 				}
@@ -146,7 +148,7 @@ xx = (function () {
 						break;
 					}
 					case s_add: {
-						const newNode = this._createChild(ed[1] /* data */);
+						const newNode = createChild(ed[1] /* data */);
 						deb('xx-for: add item', newNode);
 						parentNode.insertBefore(newNode.el, el);
 						chld.splice(cpos++, 0, newNode); // ins
@@ -159,7 +161,7 @@ xx = (function () {
 							n.scope[this.itemName] = ed[2];
 							n.render();
 						} else {
-							const newNode = this._createChild(ed[2] /* data */);
+							const newNode = createChild(ed[2] /* data */);
 							parentNode.replaceChild(newNode.el, el);
 							chld[cpos++] = newNode;
 						}
@@ -179,25 +181,25 @@ xx = (function () {
 			function renderAll() {
 				for (const c of chld) c.render();
 			}
-		}
 
-		_createChild(data) {
-			const s = createChildScope(this.scope);
-			s[this.itemName] = data;
-			return this.template.clone(s);
+			function createChild(data) {
+				const s = createChildScope(scope);
+				s[itemName] = data;
+				return tmpl.clone(s);
+			}
 		}
 	}
 
 
 	class XxIf extends XxBase {
-		constructor(marker, scope, ifCondition, tmpl) {
-			super(marker, scope, ifCondition);
+		constructor(marker, ifCondition, tmpl) {
+			super(marker, ifCondition);
 			this.tmpl = tmpl;
 			this.old = false;
 		}
 
-		render() {
-			let cond = !! this.getVal(),
+		render(scope) {
+			let cond = !! this.getVal(scope),
 			    c = (this.chld || (this.chld = []))[0],
 			    ce;
 
@@ -205,12 +207,12 @@ xx = (function () {
 				this.old = cond;
 
 				// Assign scope on demand:
-				c = c || (this.chld[0] = this.tmpl.clone(this.scope));
+				c = c || (this.chld[0] = this.tmpl.clone(scope));
 
 				cond	? elInsertAfter(this.el, c.el)
 					: this.el.parentNode.removeChild(c.el);
 			}
-			if (cond) c.render();
+			if (cond) c.render(scope);
 		}
 	};
 
@@ -241,8 +243,8 @@ xx = (function () {
 
 
 	class XxText extends XxBase {
-		render() {
-			const newText = String(this.getVal());
+		render(scope) {
+			const newText = String(this.getVal(scope));
 
 			if (this.old != newText) { // Update DOM only if needed
 				this.el.innerText = this.old = newText;
@@ -252,9 +254,9 @@ xx = (function () {
 
 
 	class XxAttr extends XxBase {
-		render() {
+		render(scope) {
 			const old = this.old || (this.old = {}),
-			      cur = this.getVal();
+			      cur = this.getVal(scope);
 			if (cur) for (const name in cur) {
 				const o = old[name], c = cur[name];
 				if (o != c) {
@@ -267,9 +269,9 @@ xx = (function () {
 
 
 	class XxProp extends XxBase {
-		render() {
+		render(scope) {
 			const old = this.old || (this.old = {}),
-			      cur = this.getVal();
+			      cur = this.getVal(scope);
 			if (cur) for (const name in cur) {
 				const o = old[name], c = cur[name];
 				if (o != c) {
@@ -296,8 +298,8 @@ xx = (function () {
 
 
 	class XxClass extends XxBase {
-		render() {
-			const cssRaw = this.getVal(),
+		render(scope) {
+			const cssRaw = this.getVal(scope),
 			      css = cssCanonical(cssRaw),
 			      oldCss = this.old, // || [...el.classList]
 			      el = this.el,
@@ -318,8 +320,8 @@ xx = (function () {
 
 
 	class XxStyle extends XxBase {
-		render() {
-			const style = this.getVal() || {},
+		render(scope) {
+			const style = this.getVal(scope) || {},
 			      oldStyle = this.old || (this.old = {});
 			for (const sName in style) {
 				const sValue = style[sName];
@@ -334,19 +336,18 @@ xx = (function () {
 
 
 	class XxHandlebar extends XxBase {
-		render() {
-			const newText = String(this.getVal());
+		render(scope) {
+			const newText = String(this.getVal(scope));
 
 			if (this.old != newText) { // Update DOM only if needed
 				this.el.textContent = this.old = newText;
 			}
 		}
 
-		newScope(el, scope) {
-			return XxBase.prototype.newScope.call(
+		newEl(el) {
+			return XxBase.prototype.newEl.call(
 				this,
-				elReplaceChild(document.createTextNode(this.old = ""), el),
-				scope);
+				elReplaceChild(document.createTextNode(this.old = ""), el));
 		}
 	}
 
@@ -369,10 +370,9 @@ xx = (function () {
 
 	class XxTmpl extends XxBase {
 		clone(scope) {
-			this.scope = scope;
 			this.tmpl = this.el.content;
 
-			const name = this.getVal(),
+			const name = this.getVal(scope),
 			      c = xxComps[name] || (
 				      elog(`xx-tmpl="${name}" not found`),
 				      this // Fallback to this.el.content
@@ -399,9 +399,8 @@ xx = (function () {
 
 				// Map chld by tree id
 				for (const n of treeTmpl.chld) {
-					chld.push(n.newScope(
-						idMap[n.el.getAttribute("xx-tree")],
-						scope));
+					chld.push(n.newEl(
+						idMap[n.el.getAttribute("xx-tree")]));
 				}
 				this.el = this.el.firstElementChild;
 				return;
@@ -416,7 +415,7 @@ xx = (function () {
 				      forStr = elGetAndDelAttribute(c, "xx-for"),
 				      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
 				      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
-				      t = tmplSelect ? new XxTmpl(el, null, tmplSelect) : new XxTree(el.content, null)
+				      t = tmplSelect ? new XxTmpl(el, tmplSelect) : new XxTree(el.content, null)
 
 				if (forStr) {
 					const [, itemName, listFactoryStr] =
@@ -428,9 +427,9 @@ xx = (function () {
 						// xx-for and xx-if combined on one element
 						listFactory = listIfFilterFactory(itemName, listFactory, ifCondition);
 					}
-					chld.push(new XxFor(el, scope, listFactory, itemName, t));
+					chld.push(new XxFor(el, listFactory, itemName, t));
 				} else {
-					chld.push(new XxIf(el, scope, ifCondition || (()=>true), t));
+					chld.push(new XxIf(el, ifCondition || (()=>true), t));
 				}
 			}
 
@@ -443,7 +442,7 @@ xx = (function () {
 				[XxClass, "xx-class"], [XxStyle, "xx-style"]]) {
 
 				for (const el of root.querySelectorAll(`[${xattr}]`)) {
-					chld.push(new xclass(el, scope, elGetAndDelAttrExpression(el, xattr)));
+					chld.push(new xclass(el, elGetAndDelAttrExpression(el, xattr)));
 				}
 			}
 
@@ -461,7 +460,7 @@ xx = (function () {
 					// Replace TEXT_NODE by an ELEMENT_NODE
 					el = elReplaceChild(document.createElement("template"), el);
 				}
-				chld.push(new XxHandlebar(el, scope, contentGen));
+				chld.push(new XxHandlebar(el, contentGen));
 			}
 
 
@@ -475,7 +474,7 @@ xx = (function () {
 
 		render() {
 			for (const node of this.chld) try {
-				node.render();
+				node.render(this.scope);
 			} catch (err) {
 				elog(err, node);
 			}
@@ -604,7 +603,7 @@ xx = (function () {
 					const r = find(n);
 					if (r) return r;
 				}
-				return elChain.has(xxFoo.el) && xxFoo;
+				return xxFoo.scope && elChain.has(xxFoo.el) && xxFoo;
 			}
 		}
 	});
