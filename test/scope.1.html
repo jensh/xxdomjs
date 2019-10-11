@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Scopes</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+	<script>
+		var v1="initV1", v2="initV2";
+	</script>
+
+	<h2>Root scope</h2>
+	<div onclick="xx.scope(this).v1='V1';xx()" expect="v1:V1">
+		v1:{{v1}}
+	</div>
+
+	<div expect="v1:V1 v2:initV2">
+		v1:{{v1}} v2:{{v2}}
+	</div>
+
+
+	<h2>If-scope == parent-scope</h2>
+	<script>
+		var tpar_if=true, tpar_v="initV";
+	</script>
+	<div expect="<div onclick=&quot;xx.scope(this).tpar_v='clicked';xx()&quot;> Inside: clicked </div> Outside: clicked">
+		<div onclick="xx.scope(this).tpar_v='clicked';xx()">
+			Inside: {{tpar_v}}
+		</div>
+		Outside: {{tpar_v}}
+	</div>
+
+	<h2>For-scope != parent-scope</h2>
+	<script>
+		var tfor_glob="global", tfor_x="global", tfor_y="global";
+	</script>
+	<div expect="<div onclick=&quot;s=xx.scope(this); s.tfor_x = 'Val' + s.n;xx()&quot;> <span onclick=&quot;s=xx.scope(this); if (s.n==2) s.tfor_y = 'Val' + s.n;xx()&quot;> n:1 tfor_x:Val1 tfor_y:global </span> </div><div onclick=&quot;s=xx.scope(this); s.tfor_x = 'Val' + s.n;xx()&quot;> <span onclick=&quot;s=xx.scope(this); if (s.n==2) s.tfor_y = 'Val' + s.n;xx()&quot;> n:2 tfor_x:Val2 tfor_y:Val2 </span> </div> Outside tfor_x: global tfor_y:global">
+		<div xx-for="n of [1,2]" onclick="s=xx.scope(this); s.tfor_x = 'Val' + s.n;xx()">
+			<span onclick="s=xx.scope(this); if (s.n==2) s.tfor_y = 'Val' + s.n;xx()">
+				n:{{n}} tfor_x:{{tfor_x}} tfor_y:{{tfor_y}}
+			</span>
+		</div>
+		Outside tfor_x: {{tfor_x}} tfor_y:{{tfor_y}}
+	</div>
+
+	<script>
+		xx(); // initialize (render and assign the scopes)
+		// Trigger onclick's:
+		for (const el of document.querySelectorAll("div[onclick],span[onclick]")) {
+			el.click();
+		}
+	</script>
+	<script src="expect.js"></script>
+</body>
+</html>

@@ -20,6 +20,11 @@
 		let show = false;
 	</script>
 
+	<h2>If with additional xx-style</h2>
+	<div expect="show: <span xx-style=&quot;{color:'blue'}&quot; xx-tree=&quot;0&quot; style=&quot;color: blue;&quot;>Blue</span>">
+		show: <span xx-if="true" xx-style="{color:'blue'}">Blue</span>
+	</div>
+
 	<h2>If with multiple xx-?</h2>
 	<div expect="show: <span xx-text=&quot;'Yes'&quot; xx-style=&quot;{color:'blue'}&quot; xx-tree=&quot;0&quot; style=&quot;color: blue;&quot;>Yes</span>">
 		show: <span xx-if="true" xx-text="'Yes'" xx-style="{color:'blue'}">???</span>
