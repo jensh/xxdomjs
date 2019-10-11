@@ -48,6 +48,23 @@
 		Outside tfor_x: {{tfor_x}} tfor_y:{{tfor_y}}
 	</div>
 
+
+	<h2>Nested For-scopes</h2>
+	<script>
+		var tn_x="global", tn_y="global", tn_z="global";
+	</script>
+	<div expect="Global: x: global y: global <div onclick=&quot;s=xx.scope(this); s.tn_x = 'x' + s.n;xx()&quot;> Loop x: x1 y: global outer_n: 1 <div onclick=&quot;s=xx.scope(this); s.tn_y = 'y' + s.n;xx()&quot;> <span> x: x1 y: y1 inner_n: 1 </span> </div><div onclick=&quot;s=xx.scope(this); s.tn_y = 'y' + s.n;xx()&quot;> <span> x: x1 y: y2 inner_n: 2 </span> </div> </div><div onclick=&quot;s=xx.scope(this); s.tn_x = 'x' + s.n;xx()&quot;> Loop x: x2 y: global outer_n: 2 <div onclick=&quot;s=xx.scope(this); s.tn_y = 'y' + s.n;xx()&quot;> <span> x: x2 y: y1 inner_n: 1 </span> </div><div onclick=&quot;s=xx.scope(this); s.tn_y = 'y' + s.n;xx()&quot;> </div> </div>">
+		Global: x: {{tn_x}} y: {{tn_y}}
+		<div xx-for="n of [1,2]" onclick="s=xx.scope(this); s.tn_x = 'x' + s.n;xx()">
+			Loop x: {{tn_x}} y: {{tn_y}} outer_n: {{n}}
+			<div xx-for="n of [1,2]" onclick="s=xx.scope(this); s.tn_y = 'y' + s.n;xx()">
+				<span xx-if="(tn_x + tn_y) != 'x2y2'">
+					x: {{tn_x}} y: {{tn_y}} inner_n: {{n}}
+				</span>
+			</div>
+		</div>
+	</div>
+
 	<script>
 		xx(); // initialize (render and assign the scopes)
 		// Trigger onclick's:

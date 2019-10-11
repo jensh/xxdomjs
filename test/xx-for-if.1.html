@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>If</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js#debug"></script>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+	<h2>For if</h2>
+	<div expect="<div> 1<span>-1</span> </div><div> 2 </div><div> 3<span>-3</span> </div>">
+		<div xx-for="n of [1,2,3]">
+			{{n}}<span xx-if="n != 2">-{{n}}</span>
+		</div>
+	</div>
+
+	<h2>For-if</h2>
+	<div expect="<div> 1 </div><div> 3 </div>">
+		<div xx-for="n of [1,2,3]" xx-if="n != 2">
+			{{n}}
+		</div>
+	</div>
+
+	<script src="expect.js"></script>
+</body>
+</html>
