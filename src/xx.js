@@ -190,30 +190,29 @@ xx = (function () {
 
 
 	class XxIf extends XxBase {
-		constructor(marker, scope, ifCondition, template) {
+		constructor(marker, scope, ifCondition, tmpl) {
 			super(marker, scope, ifCondition);
-			this.child = template;
+			this.tmpl = tmpl;
 			this.old = false;
+			this.chld = [];
 		}
 
 		render() {
-			const cond = !! this.getVal();
+			let cond = !! this.getVal(),
+			    c = this.chld[0],
+			    ce;
 
 			if (cond != this.old) {
 				this.old = cond;
-				if (cond) {
-					 // Assign scope on demand. Remember first node of DocumentFragment child.el.
-					if (!this.elOpt) this.elOpt = (this.child = this.child.clone(this.scope)).el.firstElementChild;
-					elInsertAfter(this.el, this.elOpt);
-				} else {
-					this.el.parentNode.removeChild(this.elOpt);
-				}
-			}
-			if (cond) this.child.render();
-		}
 
-		_createChild(scope) {
-			return cloneNode(this.template, scope);
+				// Assign scope on demand:
+				c = c || (this.chld[0] = this.tmpl.clone(this.scope));
+				ce = c.el.firstElementChild; // Remember first node of DocumentFragment c.el
+
+				cond	? elInsertAfter(this.el, ce)
+					: this.el.parentNode.removeChild(ce);
+			}
+			if (cond) c.render();
 		}
 	};
 
@@ -367,8 +366,7 @@ xx = (function () {
 	}
 
 
-	const xxComps = {},
-	      el2Scope = new WeakMap;
+	const xxComps = {};
 
 
 	class XxTmpl extends XxBase {
@@ -390,8 +388,7 @@ xx = (function () {
 	class XxTree {
 		constructor(root, scope, treeTmpl) {
 			Object.assign(this, {el: root, scope});
-			const nodes = this.nodes = [];
-			el2Scope.set(root.firstElementChild, scope); // root instanceof DocumentFragment!
+			const chld = this.chld = [];
 
 			if (treeTmpl) {
 				// Construct from tree template
@@ -402,9 +399,9 @@ xx = (function () {
 					idMap[el.getAttribute("xx-tree")] = el;
 				}
 
-				// Map nodes by tree id
-				for (const n of treeTmpl.nodes) {
-					nodes.push(n.newScope(
+				// Map chld by tree id
+				for (const n of treeTmpl.chld) {
+					chld.push(n.newScope(
 						idMap[n.el.getAttribute("xx-tree")],
 						scope));
 				}
@@ -432,9 +429,9 @@ xx = (function () {
 						// xx-for and xx-if combined on one element
 						listFactory = listIfFilterFactory(itemName, listFactory, ifCondition);
 					}
-					nodes.push(new XxFor(el, scope, listFactory, itemName, t));
+					chld.push(new XxFor(el, scope, listFactory, itemName, t));
 				} else {
-					nodes.push(new XxIf(el, scope, ifCondition || (()=>true), t));
+					chld.push(new XxIf(el, scope, ifCondition || (()=>true), t));
 				}
 			}
 
@@ -447,7 +444,7 @@ xx = (function () {
 				[XxClass, "xx-class"], [XxStyle, "xx-style"]]) {
 
 				for (const el of root.querySelectorAll(`[${xattr}]`)) {
-					nodes.push(new xclass(el, scope, elGetAttrExpression(el, xattr)));
+					chld.push(new xclass(el, scope, elGetAttrExpression(el, xattr)));
 				}
 			}
 
@@ -465,20 +462,20 @@ xx = (function () {
 					// Replace TEXT_NODE by an ELEMENT_NODE
 					el = elReplaceChild(document.createElement("template"), el);
 				}
-				nodes.push(new XxHandlebar(el, scope, contentGen));
+				chld.push(new XxHandlebar(el, scope, contentGen));
 			}
 
 
 			if (!scope) {
 				// Assign a tree id to each used el
-				[...new Set(nodes.map(n => n.el))].forEach((el, i) => {
+				[...new Set(chld.map(n => n.el))].forEach((el, i) => {
 					el.setAttribute("xx-tree", i);
 				});
 			}
 		}
 
 		render() {
-			for (const node of this.nodes) try {
+			for (const node of this.chld) try {
 				node.render();
 			} catch (err) {
 				elog(err, node);
@@ -603,9 +600,18 @@ xx = (function () {
 
 		// Return scope of element el
 		scope(el) {
-			let s;
-			while (el && !(s = el2Scope.get(el))) el = el.parentNode;
-			return s;
+			deb("xx.scope()", el);
+			const elChain = new Set;
+			while (el) elChain.add(el = el.parentNode);
+
+			return find(this.tree).scope;
+
+			function find(xxFoo) {
+				for (const n of xxFoo.chld) if (n.chld && elChain.has(n.el)) {
+					return find(n);
+				}
+				return xxFoo;
+			}
 		}
 	});
 
