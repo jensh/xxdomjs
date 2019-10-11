@@ -443,7 +443,7 @@ xx = (function () {
 				[XxClass, "xx-class"], [XxStyle, "xx-style"]]) {
 
 				for (const el of root.querySelectorAll(`[${xattr}]`)) {
-					chld.push(new xclass(el, scope, elGetAttrExpression(el, xattr)));
+					chld.push(new xclass(el, scope, elGetAndDelAttrExpression(el, xattr)));
 				}
 			}
 
@@ -517,12 +517,6 @@ xx = (function () {
 	function elGetAndDelAttrExpression(el, attrName) {
 		return templateExpression(elGetAndDelAttribute(el, attrName));
 	}
-
-
-	function elGetAttrExpression(el, attrName) {
-		return templateExpression(el.getAttribute(attrName), el);
-	}
-
 
 
 	function elInsertAfter(marker, elNew) {

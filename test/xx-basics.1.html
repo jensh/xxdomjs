@@ -21,49 +21,49 @@
 
 	<h2>xx-text</h2>
 
-	<div expect="<span xx-text=&quot;'xx-text'&quot;>xx-text</span>">
+	<div expect="<span>xx-text</span>">
 		<span xx-text="'xx-text'">Content</span>
 	</div>
 
 	<h2>xx-attr</h2>
 
-	<div expect="<input xx-attr=&quot;{value:'val'}&quot; value=&quot;val&quot;>">
+	<div expect="<input value=&quot;val&quot;>">
 		<input xx-attr="{value:'val'}">
 	</div>
 
 	<h2>xx-prop</h2>
 
-	<div expect="<div xx-prop=&quot;{innerHTML:'innerHTML'}&quot;>innerHTML</div>">
+	<div expect="<div>innerHTML</div>">
 		<div xx-prop="{innerHTML:'innerHTML'}">Content</div>
 	</div>
 
 	<h2>xx-style</h2>
 
-	<div expect="<div xx-style=&quot;{'background-color':'yellow'}&quot; style=&quot;background-color: yellow;&quot;>Yellow</div>">
+	<div expect="<div style=&quot;background-color: yellow;&quot;>Yellow</div>">
 		<div xx-style="{'background-color':'yellow'}">Yellow</div>
 	</div>
 
 	<h2>xx-class</h2>
 
-	<div expect="<div xx-class=&quot;'foo'&quot; class=&quot;foo&quot;>foo</div>">
+	<div expect="<div class=&quot;foo&quot;>foo</div>">
 		<div xx-class="'foo'">foo</div>
 	</div>
 
 	<h2>xx-class with {}</h2>
 
-	<div expect="<div xx-class=&quot;{bar: 1, foo: 0}&quot; class=&quot;bar&quot;>bar</div>">
+	<div expect="<div class=&quot;bar&quot;>bar</div>">
 		<div xx-class="{bar: 1, foo: 0}">bar</div>
 	</div>
 
 	<h2>xx-class and class with {}</h2>
 
-	<div expect="<div xx-class=&quot;{bar: 1, foo: 2}&quot; class=&quot;baz bar foo&quot;>bar</div>">
+	<div expect="<div class=&quot;baz bar foo&quot;>bar</div>">
 		<div xx-class="{bar: 1, foo: 2}" class="baz">bar</div>
 	</div>
 
 
 	<h2>Multiple xx-?</h2>
-	<div expect="<div xx-text=&quot;'Multi'&quot; xx-style=&quot;{'background-color':'yellow'}&quot; style=&quot;background-color: yellow;&quot;>Multi</div>">
+	<div expect="<div style=&quot;background-color: yellow;&quot;>Multi</div>">
 		<div xx-text="'Multi'" xx-style="{'background-color':'yellow'}">Content</div>
 	</div>
 
