@@ -219,8 +219,7 @@ xx = (function () {
 
 	class XxComponent {
 		constructor(el) {
-			this.tmpl = document.createDocumentFragment();
-			this.tmpl.appendChild(el);
+			(this.tmpl = document.createDocumentFragment()).appendChild(el);
 		}
 
 		paste(elTarget) {
@@ -378,7 +377,7 @@ xx = (function () {
 				      this // Fallback to this.el.content
 			      );
 
-			return (c.tree || (c.tree = new XxTree(c.tmpl, null))).clone(scope);
+			return (c.tree || (c.tree = new XxTree(c.tmpl))).clone(scope);
 		}
 	}
 
@@ -408,6 +407,15 @@ xx = (function () {
 
 
 			/*
+			 * xx-*
+			 */
+			for (const el of root.querySelectorAll("[xx-scope]")) {
+				const ex = elGetAndDelAttrExpression(el, "xx-scope");
+				if (ex) chld.push(new XxScope(el, ex, scope));
+			}
+
+
+			/*
 			 * controls
 			 */
 			for (const el of root.querySelectorAll("template[xx-ctrl]")) {
@@ -415,7 +423,8 @@ xx = (function () {
 				      forStr = elGetAndDelAttribute(c, "xx-for"),
 				      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
 				      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
-				      t = tmplSelect ? new XxTmpl(el, tmplSelect) : new XxTree(el.content, null)
+				      t = tmplSelect ? new XxTmpl(el, tmplSelect) : new XxTree(el.content)
+				el.removeAttribute("xx-ctrl"); // Eval xx-ctrl only once!
 
 				if (forStr) {
 					const [, itemName, listFactoryStr] =
@@ -453,7 +462,7 @@ xx = (function () {
 			forAllXxHandlebars(root, initXxHandlebar);
 
 			function initXxHandlebar(el) {
-				const templateStr = el.textContent
+				const templateStr = el.textContent = el.textContent
 				      .replace(/{{(.*?)}}/g, (_,exp) => '${'+exp+'}'); // Transform {{expr}} into ${expr}
 				const contentGen = templateExpression('`'+templateStr+'`', el);
 				if (!scope) {
@@ -484,6 +493,23 @@ xx = (function () {
 			return new XxTree(this.el.cloneNode(true), scope, this);
 		}
 	}
+
+
+	class XxScope extends XxBase {
+		constructor(el, gen, scope) {
+			super(el, gen);
+			this.tree = new XxTree(el, scope && this.getVal(scope));
+		}
+
+		render() {
+			this.tree.render();
+		}
+
+		clone(scope) {
+			return this.tree.clone(this.getVal(scope));
+		}
+	}
+
 
 	function templateExpression(exStr, el) {
 		if (!exStr) return null;
