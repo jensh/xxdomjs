@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-scope</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.0.0.js#debug"></script>
+	<link rel="stylesheet" type="text/css" href="expect.css" />
+</head>
+<body>
+
+	<h2>Simple Scope</h2>
+	<div expect="<div> x:<span>ValX</span> </div>">
+		<div xx-scope="{x: 'ValX'}">
+			x:<span xx-text="x">?</span>
+		</div>
+	</div>
+
+	<h2>Simple Scope with handlebars</h2>
+	<div expect="<div> x:ValX </div>">
+		<div xx-scope="{x: 'ValX'}">
+			x:{{x}}
+		</div>
+	</div>
+
+
+	<h2>Use xx-scope in xx-style</h2>
+	<div expect="<div style=&quot;color: blue;&quot;> Blue? </div>">
+		<div xx-scope="{ a:'blue' }" xx-style="{ color: a}">
+			Blue?
+		</div>
+	</div>
+
+	<h2>Use xx-scope in xx-for</h2>
+	<div expect="<div> i:v1 </div><div> i:v2 </div>">
+		<div xx-scope="{ list: ['v1', 'v2']}" xx-for="i of list">
+			i:{{i}}
+		</div>
+	</div>
+
+	<h2>Nested xx-scope's and xx-for's</h2>
+	<div expect="<div> Loop: v1 <div> i:v1w1 </div><div> i:v1w2 </div> </div><div> Loop: v2 <div> i:v2w1 </div><div> i:v2w2 </div> </div>">
+		<div xx-scope="{ list: ['v1', 'v2']}" xx-for="i of list">
+			Loop: {{i}}
+			<div xx-scope="{ list: [ i + 'w1', i + 'w2']}" xx-for="i of list">
+				i:{{i}}
+			</div>
+		</div>
+	</div>
+
+	<script src="expect.js"></script>
+</body>
+</html>
