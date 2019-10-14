@@ -111,13 +111,12 @@ xx = (function () {
 		constructor(marker, gen, itemName, tmpl) {
 			super(marker, gen);
 			Object.assign(this, {itemName, tmpl});
-			this.chld = [];
 		}
 
 		render(scope) {
 			const list = [...(this.getVal(scope) || [])], // Clone list-> Disallow mutation.-> Keep in sync with DOM
 			      oldlist = this.old || [],
-			      chld = this.chld,
+			      chld = this.chld || (this.chld = []),
 			      itemName = this.itemName,
 			      tmpl = this.tmpl;
 
