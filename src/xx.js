@@ -155,10 +155,8 @@ xx = (function () {
 					}
 					case s_replace: {
 						deb('xx-for: replace item', el);
-						if (xx.recycleDOMnodes && !this.template.tmpl /* instanceof XXTmpl? */ ) {
-							const n = chld[cpos++];
-							n.scope[this.itemName] = ed[2];
-							n.render();
+						if (xx.recycleDOMnodes && !this.tmpl.tmpl /* instanceof XXTmpl? */ ) {
+							chld[cpos++].scope[this.itemName] = ed[2];
 						} else {
 							const newNode = createChild(ed[2] /* data */);
 							parentNode.replaceChild(newNode.el, el);
@@ -206,7 +204,7 @@ xx = (function () {
 				this.old = cond;
 
 				// Assign scope on demand:
-				c = c || (this.chld[0] = this.tmpl.clone(scope));
+				c || (c = this.chld[0] = this.tmpl.clone(scope));
 
 				cond	? elInsertAfter(this.el, c.el)
 					: this.el.parentNode.removeChild(c.el);
@@ -350,21 +348,7 @@ xx = (function () {
 	}
 
 
-	function forAllXxHandlebars(root, call) {
-		const walker = document.createNodeIterator(
-			root, NodeFilter.SHOW_TEXT,
-			el => (/{{.*}}/.test(el.textContent))
-				? NodeFilter.FILTER_ACCEPT
-				: NodeFilter.FILTER_REJECT
-		);
-		for (let el; el = walker.nextNode();) {
-			call(el);
-		}
-	}
-
-
 	const xxComps = {};
-
 
 	class XxTmpl extends XxBase {
 		clone(scope) {
@@ -376,10 +360,106 @@ xx = (function () {
 				      this // Fallback to this.el.content
 			      );
 
-			return (c.tree || (c.tree = new XxTree(c.tmpl))).clone(scope);
+			return (c.tree || (c.tree = scan(null, c.tmpl))).clone(scope);
 		}
 	}
 
+
+	function scan(tree, el, scope) {
+		if (!tree) tree = new XxTree(el, scope);
+
+		const chld = tree.chld;
+
+		document.createNodeIterator(
+			el, 5 /* = NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT*/,
+			el => {
+				if (el.nodeType == 3 /* TEXT_NODE */) {
+					if (/{{.*}}/.test(el.textContent)) {
+						initXxHandlebar(el);
+					}
+					return 2; // FILTER_REJECT
+				} else {
+					/*
+					for (var i = 0; i < el.attributes.length; i++) {
+						var {name, value} = el.attributes[i];
+						switch (name) {
+						case "xx-scope":
+							return 2; // FILTER_REJECT
+						}
+					}
+
+					let ex = elGetAndDelAttrExpression(el, "xx-scope"),
+					    xxFoo;
+					if (ex) {
+						addChld(xxFoo = new XxScope(el, scope));
+						scan(xxFoo, el, xxFoo.scope);
+						return 2; // FILTER_REJECT
+					}
+					*/
+
+					/*
+					 * controls
+					 */
+					if (elGetAndDelAttribute(el, "xx-ctrl") == "") {
+						const c = el.content.firstElementChild, // template
+						      forStr = elGetAndDelAttribute(c, "xx-for"),
+						      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
+						      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
+						      t = tmplSelect ? new XxTmpl(el, tmplSelect) : scan(null, el.content)
+
+						if (forStr) {
+							const [, itemName, listFactoryStr] =
+							      forStr.match(/([a-z_]\w*)\s+(?:of|in)\b\s*(.*)/i) || // '${varname} of ${expression}'
+							      [, '$i', forStr ];
+							let listFactory = templateExpression(listFactoryStr, c);
+
+							if (ifCondition) {
+								// xx-for and xx-if combined on one element
+								listFactory = listIfFilterFactory(itemName, listFactory, ifCondition);
+							}
+							chld.push(new XxFor(el, listFactory, itemName, t));
+						} else {
+							chld.push(new XxIf(el, ifCondition || (()=>true), t));
+						}
+					} else {
+						/*
+						 * xx-*
+						 */
+						for (const [xclass, xattr] of [
+							[XxText, "xx-text"], [XxAttr, "xx-attr"], [XxProp, "xx-prop"],
+							[XxClass, "xx-class"], [XxStyle, "xx-style"]]) {
+							const ex =  elGetAndDelAttrExpression(el, xattr);
+							if (ex) chld.push(new xclass(el, ex));
+						}
+					}
+
+					// return 1: // FILTER_ACCEPT
+					return 3; // FILTER_SKIP
+				}
+			}).nextNode();
+
+		if (!scope) {
+			// Assign a tree id to each used el
+			[...new Set(chld.map(n => n.el))].forEach((el, i) => {
+				el.setAttribute("xx-tree", i);
+			});
+		}
+
+		return tree;
+
+
+		function initXxHandlebar(el) {
+			const templateStr = el.textContent = el.textContent
+			      .replace(/{{(.*?)}}/g, (_,exp) => '${'+exp+'}'); // Transform {{expr}} into ${expr}
+			const contentGen = templateExpression('`'+templateStr+'`', el);
+			if (!scope) {
+				// Replace TEXT_NODE by an ELEMENT_NODE
+				el = elReplaceChild(document.createElement("template"), el);
+			}
+			chld.push(new XxHandlebar(el, contentGen));
+		}
+
+	}
 
 	class XxTree {
 		constructor(root, scope, treeTmpl) {
@@ -400,84 +480,8 @@ xx = (function () {
 					chld.push(n.newEl(
 						idMap[n.el.getAttribute("xx-tree")]));
 				}
-				this.el = this.el.firstElementChild;
-				return;
 			}
 
-
-			/*
-			 * xx-*
-			 */
-			for (const el of root.querySelectorAll("[xx-scope]")) {
-				const ex = elGetAndDelAttrExpression(el, "xx-scope");
-				if (ex) chld.push(new XxScope(el, ex, scope));
-			}
-
-
-			/*
-			 * controls
-			 */
-			for (const el of root.querySelectorAll("template[xx-ctrl]")) {
-				const c = el.content.firstElementChild, // template
-				      forStr = elGetAndDelAttribute(c, "xx-for"),
-				      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
-				      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
-				      t = tmplSelect ? new XxTmpl(el, tmplSelect) : new XxTree(el.content)
-				el.removeAttribute("xx-ctrl"); // Eval xx-ctrl only once!
-
-				if (forStr) {
-					const [, itemName, listFactoryStr] =
-					      forStr.match(/([a-z_]\w*)\s+(?:of|in)\b\s*(.*)/i) || // '${varname} of ${expression}'
-					      [, '$i', forStr ];
-					let listFactory = templateExpression(listFactoryStr, c);
-
-					if (ifCondition) {
-						// xx-for and xx-if combined on one element
-						listFactory = listIfFilterFactory(itemName, listFactory, ifCondition);
-					}
-					chld.push(new XxFor(el, listFactory, itemName, t));
-				} else {
-					chld.push(new XxIf(el, ifCondition || (()=>true), t));
-				}
-			}
-
-
-			/*
-			 * xx-*
-			 */
-			for (const [xclass, xattr] of [
-				[XxText, "xx-text"], [XxAttr, "xx-attr"], [XxProp, "xx-prop"],
-				[XxClass, "xx-class"], [XxStyle, "xx-style"]]) {
-
-				for (const el of root.querySelectorAll(`[${xattr}]`)) {
-					chld.push(new xclass(el, elGetAndDelAttrExpression(el, xattr)));
-				}
-			}
-
-
-			/*
-			 * {{}}
-			 */
-			forAllXxHandlebars(root, initXxHandlebar);
-
-			function initXxHandlebar(el) {
-				const templateStr = el.textContent = el.textContent
-				      .replace(/{{(.*?)}}/g, (_,exp) => '${'+exp+'}'); // Transform {{expr}} into ${expr}
-				const contentGen = templateExpression('`'+templateStr+'`', el);
-				if (!scope) {
-					// Replace TEXT_NODE by an ELEMENT_NODE
-					el = elReplaceChild(document.createElement("template"), el);
-				}
-				chld.push(new XxHandlebar(el, contentGen));
-			}
-
-
-			if (!scope) {
-				// Assign a tree id to each used el
-				[...new Set(chld.map(n => n.el))].forEach((el, i) => {
-					el.setAttribute("xx-tree", i);
-				});
-			}
 		}
 
 		render() {
@@ -497,7 +501,7 @@ xx = (function () {
 	class XxScope extends XxBase {
 		constructor(el, gen, scope) {
 			super(el, gen);
-			this.tree = new XxTree(el, scope && this.getVal(scope));
+			this.tree = scan(null, el, scope && this.getVal(scope));
 		}
 
 		render() {
@@ -606,7 +610,7 @@ xx = (function () {
 			deb('xx.init()');
 			initComponents(root);
 			initFors(root);
-			this.tree = new XxTree(root, scope);
+			this.tree = scan(null, root, scope);
 		},
 
 		render() {
