@@ -368,7 +368,7 @@ xx = (function () {
 	function scan(tree, el, scope) {
 		if (!tree) tree = new XxTree(el, scope);
 
-		const chld = tree.chld;
+		const chld = tree.chld = [];
 
 		document.createNodeIterator(
 			el, 5 /* = NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT*/,
@@ -379,23 +379,14 @@ xx = (function () {
 					}
 					return 2; // FILTER_REJECT
 				} else {
-					/*
-					for (var i = 0; i < el.attributes.length; i++) {
-						var {name, value} = el.attributes[i];
-						switch (name) {
-						case "xx-scope":
-							return 2; // FILTER_REJECT
-						}
-					}
-
 					let ex = elGetAndDelAttrExpression(el, "xx-scope"),
 					    xxFoo;
 					if (ex) {
-						addChld(xxFoo = new XxScope(el, scope));
-						scan(xxFoo, el, xxFoo.scope);
+						chld.push(xxFoo = new XxScope(el, ex));
+						scan(xxFoo, el, scope && xxFoo.initScope(scope));
+
 						return 2; // FILTER_REJECT
 					}
-					*/
 
 					/*
 					 * controls
@@ -462,26 +453,8 @@ xx = (function () {
 	}
 
 	class XxTree {
-		constructor(root, scope, treeTmpl) {
+		constructor(root, scope) {
 			Object.assign(this, {el: root, scope});
-			const chld = this.chld = [];
-
-			if (treeTmpl) {
-				// Construct from tree template
-				const idMap = [];
-
-				// idMap[tree id] -> new el
-				for (const el of root.querySelectorAll("[xx-tree]")) {
-					idMap[el.getAttribute("xx-tree")] = el;
-				}
-
-				// Map chld by tree id
-				for (const n of treeTmpl.chld) {
-					chld.push(n.newEl(
-						idMap[n.el.getAttribute("xx-tree")]));
-				}
-			}
-
 		}
 
 		render() {
@@ -493,23 +466,43 @@ xx = (function () {
 		}
 
 		clone(scope) {
-			return new XxTree(this.el.cloneNode(true), scope, this);
+			const ntree = new XxTree(this.el.cloneNode(true), scope);
+
+			// Construct from tree template
+			const idMap = [];
+
+			// idMap[tree id] -> new el
+			for (const el of ntree.el.querySelectorAll("[xx-tree]")) {
+				idMap[el.getAttribute("xx-tree")] = el;
+			}
+
+			walk(ntree, this, scope);
+
+			return ntree;
+
+			function walk(ntree, otree, scope) {
+				ntree.chld = [];
+				// Map chld by tree id
+				for (const n of otree.chld) {
+					let ctree;
+					ntree.chld.push(ctree = n.newEl(
+						idMap[n.el.getAttribute("xx-tree")]));
+					if (n.chld) {
+						walk(ctree, n, ctree.initScope(scope));
+					}
+				}
+			}
 		}
 	}
 
 
 	class XxScope extends XxBase {
-		constructor(el, gen, scope) {
-			super(el, gen);
-			this.tree = scan(null, el, scope && this.getVal(scope));
-		}
-
 		render() {
-			this.tree.render();
+			XxTree.prototype.render.call(this);
 		}
 
-		clone(scope) {
-			return this.tree.clone(this.getVal(scope));
+		initScope(parentScope) {
+			return this.scope = this.getVal(parentScope);
 		}
 	}
 
