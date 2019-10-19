@@ -366,7 +366,7 @@ xx = (function () {
 
 
 	function scan(tree, el, scope) {
-		if (!tree) tree = new XxTree(el, scope);
+		if (!tree) (tree = new XxTree(el)).scope = scope;
 
 		const chld = tree.chld = [];
 
@@ -382,7 +382,7 @@ xx = (function () {
 					let ex = elGetAndDelAttrExpression(el, "xx-scope"),
 					    xxFoo;
 					if (ex) {
-						chld.push(xxFoo = new XxScope(el, ex));
+						chld.push(xxFoo = new XxTree(el, ex));
 						scan(xxFoo, el, scope && xxFoo.initScope(scope));
 
 						return 2; // FILTER_REJECT
@@ -396,7 +396,7 @@ xx = (function () {
 						      forStr = elGetAndDelAttribute(c, "xx-for"),
 						      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
 						      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
-						      t = tmplSelect ? new XxTmpl(el, tmplSelect) : scan(null, el.content)
+						      t = tmplSelect ? new XxTmpl(el, tmplSelect) : scan(null, c)
 
 						if (forStr) {
 							const [, itemName, listFactoryStr] =
@@ -452,11 +452,7 @@ xx = (function () {
 
 	}
 
-	class XxTree {
-		constructor(root, scope) {
-			Object.assign(this, {el: root, scope});
-		}
-
+	class XxTree extends XxBase {
 		render() {
 			for (const node of this.chld) try {
 				node.render(this.scope);
@@ -466,7 +462,8 @@ xx = (function () {
 		}
 
 		clone(scope) {
-			const ntree = new XxTree(this.el.cloneNode(true), scope);
+			const ntree = new XxTree(this.el.cloneNode(true));
+			ntree.scope = scope;
 
 			// Construct from tree template
 			const idMap = [];
@@ -492,13 +489,6 @@ xx = (function () {
 					}
 				}
 			}
-		}
-	}
-
-
-	class XxScope extends XxBase {
-		render() {
-			XxTree.prototype.render.call(this);
 		}
 
 		initScope(parentScope) {
