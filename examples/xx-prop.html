@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>xx-prop</title>
+	<meta name="author" content="Jens Hauke"/>
+
+	<script src="../src/xx.js"></script>
+	<style>
+[xx-bind],[xx-text] {
+	padding: 5px;
+	background: #ccc;
+}
+	</style>
+</head>
+<body>
+	<h1>Bind to element property "value"</h1>
+	<p>
+		Event oninput: <input xx-prop="{value: aValue}" oninput="this.$scope.aValue = value;"> (Instant)<br> <!-- $scope from element -->
+		Event oninput: <input xx-prop="{value: aValue}" oninput="$scope.aValue = value;"> (Instant)<br> <!-- handler run with "with(this) {cb}" (undocumented?) -->
+		Event oninput: <input xx-prop="{value: aValue}" oninput="aValue = value; xx();"> (Instant)<br> <!-- global var aValue. Trigger rendering by xx(). -->
+		Event oninput: <input xx-prop="{value: aValue}" oninput="read_input(this)"> tolower (Instant)<br>
+		Event onchange:<input xx-prop="{value: aValue}" onchange="read_input(this)"> tolower (Lazy)<br>
+	</p>
+	<p>
+		Hi {{aValue}}!
+	</p>
+	<h2>Bind to property "innerText" and attribute "fooAttribute"</h2>
+	<p>
+		<span id="span-test" xx-prop="{innerText: aValue}" xx-attr="{fooAttribute: aValue}"> Span Template </span>
+		<pre xx-text="document.getElementById('span-test').outerHTML"> </pre>
+	</p>
+
+	<h2>Source code</h2>
+	<pre xx-text="src_code"></pre>
+
+	<script>
+var src_code = document.body.innerHTML;
+var aValue = 'theValue';
+
+function read_input(el) {
+	el.$scope.aValue = el.value.toLowerCase(); // Model update
+}
+	</script>
+</body>
+</html>

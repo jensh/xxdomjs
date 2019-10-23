@@ -84,21 +84,34 @@ the keys as the "classname" and its value is an boolean expression for using or 
 </div>
 ```
 
-## xx-bind
+## xx-prop
 
-`xx-bind` bind to element properties and/or attributes. `xx-bind` expects an js-object. The
-key names of this js-object are the element property names to assign to, or the element
-attribute name, if prefixed with "$".
+`xx-prop` bind to element properties. `xx-prop` expects an js-object. The
+key names of this js-object are the element property names to assign to.
 
 ```html
-<input xx-bind="{value: aValue, $foo: 42}"></input>
+<input xx-prop="{value: aValue}">
 ```
 
 will do on every value change:
 
 ```js
 elInput.value = aValue;
-elInput.setAttribute('foo', 42);
+```
+
+## xx-attr
+
+`xx-attr` bind to element attributes. `xx-attr` expects an js-object. The
+key names of this js-object are the element attribute names to assign to.
+
+```html
+<input xx-attr="{hint: aHint}">
+```
+
+will do on every value change:
+
+```js
+elInput.setAttribute('hint', aHint);
 ```
 
 ## xx-component
