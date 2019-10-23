@@ -220,18 +220,12 @@ xx = (function () {
 		}
 
 		paste(elTarget) {
-			const el = this.tmpl.firstElementChild.cloneNode(true);
-			elReplaceChild(el, elTarget);
+			const el = elReplaceChild(this.tmpl.firstElementChild.cloneNode(true), elTarget);
 
 			// Copy attributes to new node
-			for (const attr of elTarget.attributes) {
-				let v = attr.value;
-				switch (attr.name) {
-				case 'class':
-					v += ' ' + el.getAttribute('class'); // append tmpl class names
-					break;
-				}
-				el.setAttribute(attr.name, v);
+			for (let {name:n, value:v} of elTarget.attributes) {
+				if (n == "class") v += " " + el.getAttribute(n); // append tmpl class names
+				el.setAttribute(n, v);
 			}
 			return el;
 		}
