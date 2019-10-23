@@ -396,7 +396,7 @@ xx = (function () {
 						      forStr = elGetAndDelAttribute(c, "xx-for"),
 						      ifCondition = elGetAndDelAttrExpression(c, "xx-if"),
 						      tmplSelect = elGetAndDelAttrExpression(c, "xx-tmpl"),
-						      t = tmplSelect ? new XxTmpl(el, tmplSelect) : scan(null, c)
+						      t = tmplSelect ? new XxTmpl(el, tmplSelect) : scan(null, el.content)
 
 						if (forStr) {
 							const [, itemName, listFactoryStr] =
@@ -462,14 +462,13 @@ xx = (function () {
 		}
 
 		clone(scope) {
-			const ntree = new XxTree(this.el.cloneNode(true));
+			const df = this.el.cloneNode(true),
+			      ntree = new XxTree(df.firstElementChild),
+			      idMap = [];
 			ntree.scope = scope;
 
-			// Construct from tree template
-			const idMap = [];
-
 			// idMap[tree id] -> new el
-			for (const el of ntree.el.querySelectorAll("[xx-tree]")) {
+			for (const el of df.querySelectorAll("[xx-tree]")) {
 				idMap[el.getAttribute("xx-tree")] = el;
 			}
 
