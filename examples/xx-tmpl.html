@@ -41,7 +41,7 @@
 
 	<h2>Templates</h2>
 	<template xx-component="foo" >
-		<div arg-from-template="1" xx-scope="{}">Foo num:<span xx-bind="{innerText:num}">inner span</span></div>
+		<div arg-from-template="1">Foo num:<span xx-prop="{innerText:num}">inner span</span></div>
 	</template>
 	<template xx-component="bar">
 		<div>Bar num:{{ num }} cnt:{{cnt}}</div>

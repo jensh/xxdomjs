@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<title>xx-bind</title>
+	<title>xx-prop</title>
 	<meta name="author" content="Jens Hauke"/>
 
 	<script src="../src/xx.js"></script>
@@ -15,7 +15,7 @@
 		<table>
 			<tr xx-for="fruit of fruits.all()">
 				<td>
-					<input xx-bind="{value: fruit.name}" oninput="$scope.fruit.name = value;xx()">
+					<input xx-prop="{value: fruit.name}" oninput="$scope.fruit.name = value;xx()">
 				</td>
 				<td>
 					<button onclick="$scope.fruits.delete($scope.fruit);xx();" xx-text="'del'"></button>
