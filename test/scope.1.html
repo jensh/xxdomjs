@@ -14,7 +14,7 @@
 		var v1="initV1", v2="initV2";
 	</script>
 
-	<h2>Root scope</h2>
+	<h2>Root scope</h2> <!-- Emulated clicks triggered below! -->
 	<div onclick="xx.scope(this).v1='V1';xx()" expect="v1:V1">
 		v1:{{v1}}
 	</div>
@@ -28,6 +28,7 @@
 	<script>
 		var tpar_if=true, tpar_v="initV";
 	</script>
+	<!-- Emulated clicks triggered below! -->
 	<div expect="<div onclick=&quot;xx.scope(this).tpar_v='clicked';xx()&quot;> Inside: clicked </div> Outside: clicked">
 		<div onclick="xx.scope(this).tpar_v='clicked';xx()">
 			Inside: {{tpar_v}}
@@ -66,7 +67,8 @@
 	</div>
 
 	<script>
-		xx(); // initialize (render and assign the scopes)
+		xx.render(); // initialize (render and assign the scopes)
+
 		// Trigger onclick's:
 		for (const el of document.querySelectorAll("div[onclick],span[onclick]")) {
 			el.click();

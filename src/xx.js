@@ -575,7 +575,7 @@ xx = (function () {
 	}
 
 
-	let xx = Object.assign(render, {
+	Object.assign(xx, {
 		debug: false,
 		noinit: false,
 		recycleDOMnodes: true, // Faster, but DOM nodes change scope on the fly (un-keyed)
@@ -614,18 +614,14 @@ xx = (function () {
 	});
 
 	let rsched;
-	function render(wait) {
-		try {
-			if (wait === undefined) {
+	function xx(wait=0) {
+		if (!rsched) {
+			rsched = setTimeout(() => {try {
+				rsched = false;
 				xx.render();
-			} else if (!rsched) {
-				rsched = setTimeout(() => {
-					rsched = false;
-					render();
-				}, wait);
-			}
-		} catch (err) {
-			elog(err);
+			} catch (err) {
+				elog(err);
+			}}, wait);
 		}
 	}
 
