@@ -634,7 +634,7 @@ xx = (function () {
 		// Hack?
 		Object.defineProperty(HTMLElement.prototype, "$scope", {
 			get() {
-				render(0); // render in next tick
+				xx(0); // render in next tick
 				return xx.scope(this);
 			}
 		});
