@@ -42,22 +42,27 @@ function x_random(max) {
 }
 
 function measure(func, ...args) {
-	let start = new Date();
 	console.log('Call', func, ...args);
+	let start = new Date();
 	func(...args);
 	time = (new Date() - start); // Measure func()
-	xx(); // render time.
+	xx(); // render `time`.
 }
 
 function clear_list() {
 	list = [];
-	xx();
+	xx.render(); // Prefer xx()! (see below)
 }
 
 function create(count) {
-	console.log('create', count);
+	// console.log('create', count);
 	list = x_buildData(count);
-	xx();
+
+	// Usually you would call `xx()` to schedule a render update.
+	// As we want to measure the time it takes to create AND
+	// render all elements, we call `xx.render()` to render NOW
+	// (blocking!). `xx()` would be non-blocking.
+	xx.render();
 }
 
 	</script>
