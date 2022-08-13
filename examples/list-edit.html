@@ -15,15 +15,15 @@
 		<table>
 			<tr xx-for="fruit of fruits.all()">
 				<td>
-					<input xx-prop="{value: fruit.name}" oninput="$scope.fruit.name = value;xx()">
+					<input xx-prop="{value: fruit.name}" oninput="$scope.fruit.name = value;">
 				</td>
 				<td>
-					<button onclick="$scope.fruits.delete($scope.fruit);xx();" xx-text="'del'"></button>
+					<button onclick="$scope.fruits.delete($scope.fruit);">del</button>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<button onclick="$scope.fruits.create('');xx();" xx-text="'add'"></button>
+					<button onclick="$scope.fruits.create('');">add</button>
 				</td>
 			</tr>
 		</table>

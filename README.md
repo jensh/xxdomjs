@@ -20,7 +20,7 @@ Today is: {{ (new Date).toDateString() }}.
 </script>
 ```
 
-You can "xx-scope" an HTML element. Additionally to the global JavaScript scope, every expression
+You can bind an "xx-scope" to an HTML element. Additionally to the global JavaScript scope, every expression
 placed in one of the children have also access to this xx-scope. This works very much like
 local variables in js functions.
 
@@ -30,6 +30,11 @@ local variables in js functions.
 	Access global var world = {{world}}
 </div>
 ```
+
+Within event handlers the xx-scope of that element can be accessed by
+the new property `$scope`. As a side effect, reading the property
+`$scope` also schedules a render update.
+
 
 ## xx-text
 
